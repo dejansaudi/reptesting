@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Validately — AI-Powered Venture Validation</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#111214;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+input,textarea,select,button{font-family:inherit}
+textarea{-webkit-appearance:none}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#1e1f22}
+::-webkit-scrollbar-thumb{background:#4e5058;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#6d6f78}
+@media(max-width:767px){
+  ::-webkit-scrollbar{display:none}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script>
+const {useState,useCallback,useEffect,useRef,useMemo}=React;
+
+// Responsive hook
+function useIsMobile(){
+  const [m,setM]=useState(window.innerWidth<768);
+  useEffect(()=>{
+    const h=()=>setM(window.innerWidth<768);
+    window.addEventListener("resize",h);
+    return()=>window.removeEventListener("resize",h);
+  },[]);
+  return m;
+}
+
+// Discord Onyx palette (Part 1 - main color scheme)
+const C={
+  bg:"#111214",bg2:"#1e1f22",bg3:"#2b2d31",bg4:"#313338",
+  elevated:"#232428",float:"#111214",
+  text:"#f2f3f5",text2:"#b5bac1",text3:"#949ba4",text4:"#6d6f78",
+  brand:"#5865f2",brandHover:"#4752c4",
+  green:"#23a559",yellow:"#f0b232",red:"#f23f43",
+  orange:"#f47b67",pink:"#eb459e",purple:"#9b59b6",teal:"#1abc9c",
+  border:"#3f4147",borderLight:"#4e5058",
+  gradient:"linear-gradient(135deg,#5865f2,#eb459e,#f47b67)",
+  xp:"#f0b232",
+};
+
+// STAGE_META (7 stages) - Part 1 version with full details
+const STAGE_META=[
+  {id:0,phase:"DIAGNOSE",icon:"🩺",color:"#3b82f6",tagline:"You think you have a problem worth solving? Prove it."},
+  {id:1,phase:"DISCOVER",icon:"🔬",color:"#10b981",tagline:"Talk to humans. Real ones. Not your co-founder."},
+  {id:2,phase:"DEFINE",icon:"🎯",color:"#ec4899",tagline:"Strip it down. Build less. Way less."},
+  {id:3,phase:"VALIDATE",icon:"🧪",color:"#a855f7",tagline:"Does anyone actually want to pay for this?"},
+  {id:4,phase:"IGNITE",icon:"🔥",color:"#f97316",tagline:"Light the fire. One channel. One beachhead."},
+  {id:5,phase:"DEPLOY",icon:"⚙️",color:"#14b8a6",tagline:"Systems, not heroics. Make it repeatable."},
+  {id:6,phase:"DOMINATE",icon:"👑",color:"#f59e0b",tagline:"Now scale — but only if the numbers say so."},
+];
+
+// Utility functions
+function qScore(v){
+  if(!v||!v.trim())return{t:0,s:0,e:0,a:0};const x=v.trim();
+  let s=0,e=0,a=0;
+  if(x.length>20)s++;if(x.length>60)s++;if(x.length>120)s++;
+  if(/specific|exact|\d/.test(x))s++;if(/everyone|disrupt|synergy/i.test(x))s=Math.max(0,s-2);s=Math.min(5,s);
+  if(/\d/.test(x))e++;if(/\$|€|£/.test(x))e++;if(/\d+%|\d+x/i.test(x))e++;
+  if(/interview|survey|data|research|tested/i.test(x))e++;e=Math.min(5,e);
+  if(/will|plan|test|launch|build|ship/i.test(x))a++;if(/week|month|day|quarter/i.test(x))a++;
+  if(x.length>40)a++;if(/step|first|then|next/i.test(x))a++;a=Math.min(5,a);
+  return{t:Math.round(((s+e+a)/15)*100),s,e,a};
+}
+
+function cleanKey(k){return k.replace(/[^\x20-\x7E]/g,"").trim();}
+
+async function askAI(key,sys,msg){
+  const safeKey=cleanKey(key);
+  if(!safeKey||!safeKey.startsWith("sk-")){return"⚠️ Invalid API key. Please re-enter your key in Settings (should start with sk-ant-).";}
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":safeKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:"claude-sonnet-4-5-20250929",max_tokens:900,system:sys,messages:[{role:"user",content:msg}]})
+    });
+    if(!r.ok){const t=await r.text();try{const j=JSON.parse(t);throw new Error(j.error?.message||t);}catch(pe){if(pe.message!==t)throw pe;throw new Error(t);}}
+    return(await r.json()).content[0].text;
+  }catch(e){return`⚠️ ${e.message.substring(0,200)}`;}
+}
+
+const AI_SYS=`You are a brutally honest venture mentor inside Validately — a tool combining MIT Design X methodology with Hekovnik Startup School frameworks.
+
+Your job: CHALLENGE the user's thinking. Find WEAKNESSES. Push for evidence.
+
+RULES:
+- Be direct, critical, no fluff
+- Point out specific weaknesses
+- Ask 1-2 follow-up questions exposing blind spots
+- Reference MIT Design X gates: problem validated? PMF measured? Unit economics positive?
+- Compare against benchmarks: 20+ interviews, 40%+ PMF, LTV:CAC>3:1
+- Call out buzzwords without substance
+- Demand numbers
+- Flag untested assumptions
+- 4-6 sentences MAX
+- End with ONE pointed question
+
+You know: Business Model Canvas, Value Proposition Canvas, Hook Model, Empathy Map, Strategy Canvas, Lean Startup, Sean Ellis PMF, MIT Design X gates (Diagnose→Discover→Define→Validate→Ignite→Deploy→Dominate).`;
+
+const LVS=[
+  {lv:1,n:"Observer",xp:0,ic:"👁️",c:C.text3},
+  {lv:2,n:"Explorer",xp:200,ic:"🔍",c:C.brand},
+  {lv:3,n:"Builder",xp:500,ic:"🔨",c:C.purple},
+  {lv:4,n:"Validator",xp:900,ic:"🔬",c:C.pink},
+  {lv:5,n:"Launcher",xp:1400,ic:"🚀",c:C.orange},
+];
+const getLv=xp=>{let l=LVS[0];for(const v of LVS)if(xp>=v.xp)l=v;return l;};
+const getNxt=xp=>{for(const l of LVS)if(xp<l.xp)return l;return null;};
+
+// GENIE_TRIGGERS (20 patterns)
+const GENIE_TRIGGERS=[
+  {pattern:/problem.*problem|problem.*problem/i,msg:"Wait. You said the problem twice. What's the actual problem?",stage:0},
+  {pattern:/everyone|all people|everyone needs/i,msg:"'Everyone' is code for 'no one.' Who specifically? Narrow it.",stage:0},
+  {pattern:/disrupt|revolutionary|game-?change/i,msg:"Big words, zero evidence. What's the proof?",stage:1},
+  {pattern:/viral|viral loop|go viral/i,msg:"Viral isn't a strategy. How do users actually find you?",stage:3},
+  {pattern:/just build|mvp|move fast/i,msg:"Before you code: who did you interview? How many?",stage:1},
+  {pattern:/product[-_]market fit|pmf/i,msg:"PMF isn't a feeling. Prove it with metrics: retention? NPS? Growth?",stage:3},
+  {pattern:/scale|growth|grow/i,msg:"Scale what? First, show me unit economics work at tiny scale.",stage:4},
+  {pattern:/ai[-_]powered|machine learning|blockchain|ai|ml/i,msg:"Tech isn't the moat. Does it solve the problem 10x better? Proof?",stage:2},
+  {pattern:/no competition|market gap/i,msg:"No competition = no market. Who else tried? Why did they fail?",stage:1},
+  {pattern:/first mover|first to market/i,msg:"First mover myth. Speed to PMF beats speed to market.",stage:3},
+  {pattern:/pitch deck|pitch|vc|funding/i,msg:"Before investors: have you proven users will pay? Data first.",stage:3},
+  {pattern:/network effect|network/i,msg:"Network effects require critical mass. At what size does it kick in?",stage:4},
+  {pattern:/subscription|recurring revenue/i,msg:"Recurring revenue is nice. But what's the churn? What's LTV?",stage:3},
+  {pattern:/b2b|b2c|enterprise|saas/i,msg:"Model matters. What's your unit? User, account, seat?",stage:2},
+  {pattern:/partnership|strategic partnership|partner/i,msg:"Partnerships are nice-to-have. What's the core product first?",stage:2},
+  {pattern:/brand|brand loyalty|brand awareness/i,msg:"Brand follows product. Build the product first.",stage:2},
+  {pattern:/marketing|content|social media/i,msg:"Great marketing of a bad product is a bad business. Fix product first.",stage:2},
+  {pattern:/pivot|we're pivoting|pivot to/i,msg:"Pivots happen. But WHY? What did you learn that changed?",stage:1},
+  {pattern:/we think|i think|we believe/i,msg:"Opinions don't scale. What did users tell you? Interview data.",stage:1},
+  {pattern:/launch|going live|go live/i,msg:"Launching ≠ validating. Who buys? How many? At what price?",stage:3},
+];
+
+// PROACTIVE_TRIGGERS - auto-fires when key fields reach thresholds (1-2 per stage)
+const PROACTIVE_TRIGGERS=[
+  // Stage 0 - DIAGNOSE
+  {stage:0,field:"problem_statement",minLength:40,prompt:(val,data)=>`The user just described their problem: "${val.substring(0,200)}". Give a real-world example of a startup that tackled a similar problem (include company name, what happened, outcome with numbers). Then point out ONE specific weakness in their problem statement and ask ONE sharp follow-up question. Be brutally specific.`},
+  {stage:0,field:"tam_sam_som",minLength:20,prompt:(val,data)=>`The user estimated their market as: "${val.substring(0,200)}". Compare this to a real startup's TAM/SAM/SOM (give specific numbers). Point out if their estimate seems inflated or too vague. Ask ONE question about how they calculated these numbers.`},
+  // Stage 1 - DISCOVER
+  {stage:1,field:"interviews_count",minLength:1,prompt:(val,data)=>`User says they did ${val} interviews. Real example: Superhuman did 100+ interviews before writing a line of code. Dropbox validated with a video, not a product. If their count is low (<15), challenge them hard. If decent, suggest what to look for in the next batch. Ask ONE question about interview quality vs quantity.`},
+  {stage:1,field:"verbatim_quotes",minLength:30,prompt:(val,data)=>`The user shared these customer quotes: "${val.substring(0,300)}". Analyze the quality. Are these real pain signals or polite feedback? Reference: Amazon's "working backwards" method — real customer pain sounds desperate, not polite. Point out which quotes sound strongest and which sound like vanity. Ask ONE follow-up.`},
+  // Stage 2 - DEFINE
+  {stage:2,field:"value_prop",minLength:30,prompt:(val,data)=>`Value proposition: "${val.substring(0,200)}". Compare to great value props: Stripe ("payments for developers"), Slack ("where work happens"), Figma ("design together"). Is theirs specific enough? Does it pass the "so what?" test? Challenge ONE weakness. Real example of a startup that nailed vs failed their value prop.`},
+  {stage:2,field:"must_have",minLength:20,prompt:(val,data)=>`Must-have features: "${val.substring(0,200)}". Reference: Instagram launched with ONLY photo filters + social sharing. Twitter was just 140 chars. If they listed more than 3 features, push back HARD. Real example of feature creep killing a startup. Ask: which ONE feature would users pay for alone?`},
+  // Stage 3 - VALIDATE
+  {stage:3,field:"pmf_score",minLength:1,prompt:(val,data)=>`PMF score: ${val}%. Sean Ellis benchmark: 40%+ means PMF. Superhuman measured 58% and celebrated. If below 40%, this is a RED FLAG — reference Quibi (launched without PMF, lost $1.75B). If above 40%, validate HOW they measured it. Ask ONE question about methodology.`},
+  {stage:3,field:"ltv_cac_ratio",minLength:1,prompt:(val,data)=>`LTV:CAC ratio: ${val}. Benchmark: 3:1 is healthy (SaaS standard). Netflix early days: ~7:1. If below 3:1, this is unsustainable — reference Homejoy (CAC>LTV, collapsed). If good, ask about payback period. Give ONE specific suggestion to improve the ratio.`},
+  // Stage 4 - IGNITE
+  {stage:4,field:"beachhead_segment",minLength:20,prompt:(val,data)=>`Beachhead: "${val.substring(0,200)}". Reference: Facebook started with Harvard only. Uber started with SF tech workers. PayPal started with eBay power sellers. Is their beachhead narrow enough? Challenge if it's too broad. Ask ONE question about why THIS segment first.`},
+  {stage:4,field:"first_10_customers",minLength:20,prompt:(val,data)=>`First 10 customers plan: "${val.substring(0,200)}". Reference: Airbnb went door-to-door in NYC. Stripe installed for early users manually. DoorDash delivered food themselves. Are they willing to do unscalable things? Challenge any plan that relies on ads or "going viral." Ask ONE specific tactical question.`},
+  // Stage 5 - DEPLOY
+  {stage:5,field:"sales_playbook",minLength:30,prompt:(val,data)=>`Sales playbook: "${val.substring(0,200)}". Reference: HubSpot's inbound flywheel, Salesforce's "no software" direct sales. Does their playbook have clear steps? Is it repeatable by someone OTHER than the founder? Challenge vagueness. Ask ONE question about conversion rates between steps.`},
+  {stage:5,field:"gross_margin",minLength:1,prompt:(val,data)=>`Gross margin: ${val}%. Benchmarks: SaaS 70-80%, Marketplace 50-70%, Hardware 30-50%. WeWork had <30% margins disguised as tech. If below 50%, challenge scalability. Give ONE real-world comparison and ask what they can do to improve margin.`},
+  // Stage 6 - DOMINATE
+  {stage:6,field:"thiel_moat",minLength:40,prompt:(val,data)=>`Moat description: "${val.substring(0,200)}". Peter Thiel's 7 Powers: network effects (Facebook), economies of scale (Amazon), switching costs (Salesforce), brand (Apple), proprietary tech (Google Search), data (Waze), cornered resources (De Beers). Which power do they ACTUALLY have? Challenge any claims without evidence. Ask ONE pointed question.`},
+  {stage:6,field:"arr_mrr",minLength:1,prompt:(val,data)=>`Revenue: ${val}. Benchmarks: $1M ARR = real business. $10M ARR = Series B territory. $100M ARR = category leader. Reference their number against stage-appropriate benchmarks. If impressive, challenge sustainability. If low, suggest ONE specific growth lever. Ask about growth rate (MoM%).`}
+];
+
+// GATE_CRITERIA - Part 2 version (array of arrays, stage-specific)
+const GATE_CRITERIA=[
+  // Stage 0
+  [
+    {field:"venture_name",msg:"Venture name required",check:"required"},
+    {field:"problem_statement",msg:"Problem statement required (50+ chars)",check:"minLength:50"},
+    {field:"who_has_problem",msg:"Target customer required",check:"required"},
+    {field:"why_now",msg:"Why now timing required",check:"required"},
+    {field:"tam_sam_som",msg:"TAM/SAM/SOM required",check:"required"},
+    {field:"unfair_advantage",msg:"Unfair advantage required",check:"required"},
+    {field:"assumptions",msg:"Key assumptions required",check:"required"}
+  ],
+  // Stage 1
+  [
+    {field:"interviews_count",msg:"15+ interviews required",check:"minValue:15"},
+    {field:"verbatim_quotes",msg:"Verbatim quotes required",check:"required"},
+    {field:"persona_primary",msg:"Primary persona required",check:"required"},
+    {field:"top_pains",msg:"Top pains required",check:"required"},
+    {field:"competitor_matrix",msg:"Competitor matrix required",check:"required"}
+  ],
+  // Stage 2
+  [
+    {field:"core_problem",msg:"Core problem required",check:"required"},
+    {field:"value_prop",msg:"Value prop required",check:"required"},
+    {field:"must_have",msg:"Must-have features required",check:"required"},
+    {field:"not_building",msg:"Not building list required",check:"required"}
+  ],
+  // Stage 3
+  [
+    {field:"pmf_score",msg:"PMF score required (≥40%)",check:"minValue:40"},
+    {field:"cac",msg:"CAC required",check:"required"},
+    {field:"ltv",msg:"LTV required",check:"required"},
+    {field:"ltv_cac_ratio",msg:"LTV:CAC ratio required (≥3)",check:"minValue:3"},
+    {field:"revenue_model",msg:"Revenue model required",check:"required"},
+    {field:"pmf_verdict",msg:"PMF verdict required",check:"required"}
+  ],
+  // Stage 4
+  [
+    {field:"beachhead_segment",msg:"Beachhead segment required",check:"required"},
+    {field:"omtm",msg:"OMTM required",check:"required"},
+    {field:"primary_channel",msg:"Primary channel required",check:"required"},
+    {field:"pricing_model",msg:"Pricing model required",check:"required"},
+    {field:"first_10_customers",msg:"First 10 customers plan required",check:"required"}
+  ],
+  // Stage 5
+  [
+    {field:"sales_playbook",msg:"Sales playbook required",check:"required"},
+    {field:"sales_cycle",msg:"Sales cycle required (≤60 days)",check:"maxValue:60"},
+    {field:"team_plan",msg:"Team plan required (50+ chars)",check:"minLength:50"},
+    {field:"expansion_revenue",msg:"Expansion revenue goal required",check:"required"},
+    {field:"gross_margin",msg:"Gross margin required (≥50%)",check:"minValue:50"}
+  ],
+  // Stage 6
+  [
+    {field:"arr_mrr",msg:"ARR/MRR required",check:"required"},
+    {field:"analytics_level",msg:"Analytics level required",check:"required"},
+    {field:"thiel_moat",msg:"Thiel moat required (80+ chars)",check:"minLength:80"},
+    {field:"vision_10yr",msg:"10-year vision required",check:"required"}
+  ]
+];
+
+// Ring component
+function Ring({pct,size=56,stroke=4,color,children}){
+  const r=(size-stroke)/2,ci=2*Math.PI*r;
+  return React.createElement("div",{style:{position:"relative",width:size,height:size}},
+    React.createElement("svg",{width:size,height:size,style:{transform:"rotate(-90deg)"}},
+      React.createElement("circle",{cx:size/2,cy:size/2,r:r,fill:"none",stroke:C.border,strokeWidth:stroke}),
+      React.createElement("circle",{cx:size/2,cy:size/2,r:r,fill:"none",stroke:color||C.brand,strokeWidth:stroke,strokeDasharray:ci,strokeDashoffset:ci-(pct/100)*ci,strokeLinecap:"round",style:{transition:"stroke-dashoffset 0.6s"}})
+    ),
+    React.createElement("div",{style:{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center"}},children)
+  );
+}
+
+// Confetti component
+function Confetti(){
+  const canRef=useRef(null);
+  useEffect(()=>{
+    if(!canRef.current)return;
+    const c=canRef.current.getContext("2d"),w=window.innerWidth,h=window.innerHeight;
+    canRef.current.width=w;canRef.current.height=h;
+    const conf=[];
+    for(let i=0;i<50;i++){
+      conf.push({x:Math.random()*w,y:Math.random()*h-h,vx:(Math.random()-0.5)*4,vy:Math.random()*2+2,life:1,color:["#5865f2","#eb459e","#f47b67","#23a559","#f0b232"][Math.floor(Math.random()*5)]});
+    }
+    const a=()=>{
+      c.clearRect(0,0,w,h);
+      for(const p of conf){
+        p.x+=p.vx;p.y+=p.vy;p.vy+=0.1;p.life-=0.01;
+        c.globalAlpha=p.life;c.fillStyle=p.color;c.fillRect(p.x,p.y,4,4);
+      }
+      if(conf.some(p=>p.life>0))requestAnimationFrame(a);
+    };
+    a();
+  },[]);
+  return React.createElement("canvas",{ref:canRef,style:{position:"fixed",top:0,left:0,width:"100%",height:"100%",pointerEvents:"none"}});
+}
+
+// QBadge component
+function QBadge({q}){
+  if(!q||q.t===0)return null;
+  const col=q.t<40?"#f23f43":q.t<70?"#f0b232":"#23a559";
+  return React.createElement("div",{style:{display:"inline-flex",alignItems:"center",gap:"4px",padding:"2px 6px",backgroundColor:col,color:C.bg,borderRadius:"4px",fontSize:"11px",fontWeight:"600"}},
+    "Q:",React.createElement("span",null,q.t,"%")
+  );
+}
+
+// Section component
+function Section({title,icon,children,stage}){
+  const sm=useIsMobile();
+  return React.createElement("div",{style:{padding:sm?"12px":"16px",backgroundColor:C.bg3,border:`1px solid ${C.border}`,borderRadius:"8px",marginBottom:"12px"}},
+    React.createElement("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"8px",fontSize:sm?"13px":"14px",fontWeight:"600",color:C.text}},
+      React.createElement("span",{style:{fontSize:sm?"18px":"20px"}},icon),title
+    ),
+    React.createElement("div",{style:{color:C.text2,fontSize:sm?"12px":"13px",lineHeight:"1.5"}},children)
+  );
+}
+
+// Benchmark component
+function Benchmark({stage,label,value,unit="",good="",ok="",bad=""}){
+  // Support both old signature (stage-based) and new signature (value-based)
+  if(stage!==undefined&&typeof stage==="number"){
+    const bm=GATE_CRITERIA[stage];
+    return React.createElement("div",{style:{backgroundColor:C.bg2,border:`1px solid ${C.borderLight}`,borderRadius:"6px",padding:"12px",marginTop:"8px",fontSize:"12px",color:C.text2}},
+      React.createElement("div",{style:{fontWeight:"600",color:C.text,marginBottom:"8px"}},"Gate Checklist:"),
+      React.createElement("ul",{style:{margin:0,paddingLeft:"20px",color:C.text2}},
+        bm.criteria.map((c,i)=>React.createElement("li",{key:i,style:{marginBottom:"4px"}},c))
+      )
+    );
+  }
+  // New signature for value-based benchmarks
+  let status="⚪";
+  if(value){
+    const v=parseFloat(value);
+    if(bad&&v<parseFloat(bad))status="🔴";
+    else if(ok&&v<parseFloat(ok))status="🟡";
+    else if(good&&v>=parseFloat(good))status="🟢";
+  }
+  return React.createElement("div",{style:{padding:10,background:C.bg3,borderRadius:6,border:`1px solid ${C.border}`,marginBottom:10}},
+    React.createElement("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
+      React.createElement("div",null,
+        React.createElement("div",{style:{fontSize:11,fontWeight:700,color:C.text}},`${status} ${label}`),
+        React.createElement("div",{style:{fontSize:9,color:C.text3}},`${value}${unit}`)
+      ),
+      React.createElement("div",{style:{fontSize:9,color:C.text3,textAlign:"right"}},
+        good&&`Good: ${good}${unit}`,
+        ok&&React.createElement("div",null,`OK: ${ok}${unit}`),
+        bad&&React.createElement("div",null,`Bad: <${bad}${unit}`)
+      )
+    )
+  );
+}
+
+// FailStory component
+function FailStory({stage}){
+  const stories={
+    0:"Startup claimed 'huge problem' but never talked to users. Pivoted 3x in 6 months.",
+    1:"Founder fell in love with idea, not the problem. Built for 8 months with zero user feedback.",
+    2:"Shipped 12 features. Users wanted 1. Pivoted to single feature, found traction.",
+    3:"'Everyone wants this.' Turned out: nobody would pay. No LOI, no deposits, just hope.",
+    4:"Paid ads: $50 CAC. Lifetime value: $30. Math doesn't work. They scaled anyways.",
+    5:"Grew fast but had no ops. Burned out team. Churn spiked 60%. Hired ops person — game changer.",
+    6:"Reached $500k ARR. Competitor appeared with 1/5 the price. Moat was speed, not defensibility.",
+  };
+  return React.createElement("div",{style:{backgroundColor:C.elevated,border:`1px solid ${C.border}`,borderRadius:"6px",padding:"10px",marginTop:"8px",fontSize:"11px",color:C.text3,fontStyle:"italic"}},"📖 ",stories[stage]);
+}
+
+// Tip component
+function Tip({text}){
+  return React.createElement("div",{style:{backgroundColor:`${C.brand}20`,border:`1px solid ${C.brand}40`,borderRadius:"6px",padding:"10px",marginTop:"8px",fontSize:"12px",color:C.text2}},
+    "💡 ",text
+  );
+}
+
+// SmartField (SF) component - UNIFIED VERSION for both Part 1 and Part 2 usage
+function SF({label,type="text",value="",onChange,placeholder="",hint,maxlen,disabled,aiKey,aiSys,aiMsg,onAI,tips,examples,stage,gate=false,icon="",help=""}){
+  const [aiLoad,setAiLoad]=useState(false);
+  const [tip,setTip]=useState(null);
+  const sm=useIsMobile();
+  const q=useMemo(()=>qScore(value),[value]);
+
+  const handleAI=async()=>{
+    if(!aiKey||!aiMsg)return;
+    setAiLoad(true);
+    const resp=await askAI(aiKey,aiSys,aiMsg(value));
+    setAiLoad(false);
+    if(onAI)onAI(resp);
+  };
+
+  const header={display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"6px"};
+  const labelStyle={fontSize:sm?"11px":"10px",fontWeight:"600",color:C.text3,textTransform:"uppercase",letterSpacing:"0.5px"};
+  const btnGroupStyle={display:"flex",gap:"6px"};
+  const btnStyle={padding:"3px 8px",fontSize:"9px",backgroundColor:C.bg4,color:C.text2,border:`1px solid ${C.border}`,borderRadius:"4px",cursor:"pointer",transition:"all 0.2s"};
+
+  const inputStyle={fontSize:sm?"13px":"12px",padding:sm?"10px 12px":"8px 10px",backgroundColor:C.bg2,color:C.text,border:`1px solid ${C.border}`,borderRadius:"6px",width:"100%",fontFamily:"monospace",boxSizing:"border-box",transition:"border-color 0.2s"};
+
+  return React.createElement("div",{style:{marginBottom:"12px"}},
+    React.createElement("div",{style:header},
+      React.createElement("div",{style:{display:"flex",alignItems:"center",gap:"6px"}},
+        React.createElement("label",{style:labelStyle},label),
+        gate&&React.createElement("span",{style:{fontSize:10,background:C.brand,color:C.text,padding:"2px 6px",borderRadius:4}},"GATE"),
+        icon&&React.createElement("span",{style:{fontSize:14}},icon),
+        React.createElement(QBadge,{q})
+      ),
+      React.createElement("div",{style:btnGroupStyle},
+        aiKey&&aiMsg?React.createElement("button",{onClick:handleAI,disabled:aiLoad||!value,style:{...btnStyle,opacity:aiLoad||!value?0.5:1,cursor:aiLoad||!value?"not-allowed":"pointer"}},aiLoad?"🔄":"🧠"):null,
+        tips?React.createElement("button",{onClick:()=>setTip(!tip),style:btnStyle},"?"):null,
+        examples?React.createElement("button",{onClick:()=>onChange(examples[0]),style:btnStyle},"ex"):null
+      )
+    ),
+    type==="textarea"?
+      React.createElement("textarea",{value:value||"",onChange:e=>onChange(e.target.value),placeholder:placeholder||"",disabled:disabled,maxLength:maxlen,rows:sm?(type==="short"?2:4):(type==="short"?2:4),style:{...inputStyle,resize:"vertical",minHeight:sm?(type==="short"?"50px":"80px"):(type==="short"?"50px":"80px")}}):
+      React.createElement("input",{type:type==="email"?"email":"text",value:value||"",onChange:e=>onChange(e.target.value),placeholder:placeholder||"",disabled:disabled,maxLength:maxlen,style:inputStyle}),
+    hint||help?React.createElement("div",{style:{fontSize:"11px",color:C.text4,marginTop:"4px"}},hint||help):null,
+    tip&&tips?React.createElement("div",{style:{fontSize:"11px",color:C.text2,marginTop:"6px",padding:"6px",backgroundColor:C.bg2,borderRadius:"4px"}},tips):null
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// STAGE DEFINITIONS (from Part 2)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const STAGE_0={
+  id:0,
+  title:"Diagnose",
+  xp:120,
+  desc:"Validate that the problem exists and matters. Case study: Webvan lost $800M solving a problem nobody had.",
+  assess:[
+    {id:"v1_pass",msg:"Problem is deep and specific",icon:"✓"}
+  ],
+  render:(g,u)=>React.createElement("div",null,
+    React.createElement("div",{style:{padding:12,background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`,marginBottom:16}},
+      React.createElement("div",{style:{fontSize:10,fontWeight:700,color:C.text3,textTransform:"uppercase",marginBottom:6}},"📖 FailStory"),
+      React.createElement("div",{style:{fontSize:11,color:C.text2}},
+        "Webvan ($800M lost): Built the fastest grocery delivery in 1999. Perfect product. Wrong problem—customers didn't care enough to pay premium prices. The TAM was real, but the willingness to pay wasn't."
+      )
+    ),
+    React.createElement("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}},
+      React.createElement(SF,{label:"Venture Name",value:g("venture_name"),onChange:v=>u("venture_name",v),placeholder:"e.g., TensorFlow for Biotech",gate:true}),
+      React.createElement(SF,{label:"Team Size",type:"number",value:g("team_size"),onChange:v=>u("team_size",v),placeholder:"e.g., 3",help:"Initial founders"})
+    ),
+    React.createElement(SF,{label:"Problem Statement",value:g("problem_statement"),onChange:v=>u("problem_statement",v),type:"textarea",placeholder:"Describe the specific problem in 1-2 sentences",gate:true}),
+    React.createElement(SF,{label:"Who has this problem?",value:g("who_has_problem"),onChange:v=>u("who_has_problem",v),type:"textarea",placeholder:"Name the specific segment (job title, context, pain)",gate:true}),
+    React.createElement(SF,{label:"Why is this a contrarian bet?",value:g("contrarian_bet"),onChange:v=>u("contrarian_bet",v),type:"textarea",placeholder:"Why do smart people disagree?"}),
+    React.createElement(SF,{label:"Why NOW? (timing)",value:g("why_now"),onChange:v=>u("why_now",v),type:"textarea",placeholder:"What changed in the world?",gate:true}),
+    React.createElement(SF,{label:"TAM / SAM / SOM",value:g("tam_sam_som"),onChange:v=>u("tam_sam_som",v),type:"textarea",placeholder:"Total Addressable / Serviceable / Obtainable market",gate:true}),
+    React.createElement(SF,{label:"Unfair Advantage",value:g("unfair_advantage"),onChange:v=>u("unfair_advantage",v),type:"textarea",placeholder:"What do you have that competitors don't?",gate:true}),
+    React.createElement(SF,{label:"Key Assumptions",value:g("assumptions"),onChange:v=>u("assumptions",v),type:"textarea",placeholder:"List 3-5 riskiest assumptions (one per line)",gate:true})
+  )
+};
+
+const STAGE_1={
+  id:1,
+  title:"Discover",
+  xp:120,
+  desc:"Talk to 15+ customers. Understand their pain deeply. Case study: Juicero ($120M lost) never asked if customers actually wanted a $400 juice press.",
+  assess:[
+    {id:"v2_pass",msg:"15+ customer interviews conducted",icon:"✓"}
+  ],
+  render:(g,u)=>React.createElement("div",null,
+    React.createElement("div",{style:{padding:12,background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`,marginBottom:16}},
+      React.createElement("div",{style:{fontSize:10,fontWeight:700,color:C.text3,textTransform:"uppercase",marginBottom:6}},"📖 FailStory"),
+      React.createElement("div",{style:{fontSize:11,color:C.text2}},
+        "Juicero ($120M lost): Built a beautiful $400 WiFi-enabled juice press. Founders never asked: do customers want this? Video showed users could get the same juice by hand. They validated the product, not the problem."
+      )
+    ),
+    React.createElement(SF,{label:"Number of interviews",type:"number",value:g("interviews_count"),onChange:v=>u("interviews_count",v),placeholder:"15+",gate:true}),
+    React.createElement(Benchmark,{label:"Interview Depth",value:g("interviews_count"),good:"15",ok:"10",bad:"5"}),
+    React.createElement(SF,{label:"Verbatim customer quotes (pains)",value:g("verbatim_quotes"),onChange:v=>u("verbatim_quotes",v),type:"textarea",placeholder:"Paste actual words from interviews. One quote per line.",gate:true}),
+    React.createElement(SF,{label:"Primary Persona",value:g("persona_primary"),onChange:v=>u("persona_primary",v),type:"textarea",placeholder:"Name, role, context. What keeps them up at night?",gate:true}),
+    React.createElement(SF,{label:"Top 3 pains",value:g("top_pains"),onChange:v=>u("top_pains",v),type:"textarea",placeholder:"1. Pain A\n2. Pain B\n3. Pain C",gate:true}),
+    React.createElement(SF,{label:"What do they think/feel?",value:g("think_feel"),onChange:v=>u("think_feel",v),type:"textarea",placeholder:"Emotions, beliefs, mental model"}),
+    React.createElement(SF,{label:"Current workarounds",value:g("current_workarounds"),onChange:v=>u("current_workarounds",v),type:"textarea",placeholder:"How do they solve this TODAY?"}),
+    React.createElement(SF,{label:"Customer journey map",value:g("journey_map"),onChange:v=>u("journey_map",v),type:"textarea",placeholder:"Awareness → Consideration → Purchase → Retention"}),
+    React.createElement(SF,{label:"Competitor matrix",value:g("competitor_matrix"),onChange:v=>u("competitor_matrix",v),type:"textarea",placeholder:"Who else is solving this? What are they missing?",gate:true})
+  )
+};
+
+const STAGE_2={
+  id:2,
+  title:"Define",
+  xp:110,
+  desc:"Create the product definition. Case study: Google Wave—beautiful feature-rich product, but no one knew why they needed it.",
+  assess:[
+    {id:"v3_pass",msg:"Must-have features limited to 3 or fewer",icon:"✓"}
+  ],
+  render:(g,u)=>React.createElement("div",null,
+    React.createElement("div",{style:{padding:12,background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`,marginBottom:16}},
+      React.createElement("div",{style:{fontSize:10,fontWeight:700,color:C.text3,textTransform:"uppercase",marginBottom:6}},"📖 FailStory"),
+      React.createElement("div",{style:{fontSize:11,color:C.text2}},
+        "Google Wave (failed): Incredible feature set. Real-time collaboration, draggable UI, embeddable gadgets. But users couldn't answer: 'Why do I need this instead of email?' No clear value prop."
+      )
+    ),
+    React.createElement(SF,{label:"Problem Statement (refined)",value:g("core_problem"),onChange:v=>u("core_problem",v),type:"text",placeholder:"One sentence",gate:true}),
+    React.createElement(SF,{label:"Value Proposition",value:g("value_prop"),onChange:v=>u("value_prop",v),type:"textarea",placeholder:"For [persona], our [product] is [category] that [benefit].",gate:true}),
+    React.createElement(SF,{label:"Must-have features (v1)",value:g("must_have"),onChange:v=>u("must_have",v),type:"textarea",placeholder:"1. Feature A\n2. Feature B\n3. Feature C\nMax 3!",gate:true}),
+    React.createElement(SF,{label:"What we're NOT building",value:g("not_building"),onChange:v=>u("not_building",v),type:"textarea",placeholder:"List 5 things we're explicitly excluding",gate:true}),
+    React.createElement("div",{style:{padding:12,background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`,marginBottom:14}},
+      React.createElement("div",{style:{fontSize:11,fontWeight:700,color:C.text,marginBottom:10}},"🪝 Habit Hook (Fogg BJ Model)"),
+      React.createElement(SF,{label:"Trigger (external cue)",value:g("hook_trigger"),onChange:v=>u("hook_trigger",v),type:"text",placeholder:"What reminds the user?"}),
+      React.createElement(SF,{label:"Action (what they do)",value:g("hook_action"),onChange:v=>u("hook_action",v),type:"text",placeholder:"The behavior"}),
+      React.createElement(SF,{label:"Reward (why they do it)",value:g("hook_reward"),onChange:v=>u("hook_reward",v),type:"text",placeholder:"The payoff"}),
+      React.createElement(SF,{label:"Investment (builds habit)",value:g("hook_investment"),onChange:v=>u("hook_investment",v),type:"text",placeholder:"What they put in (data, time, money)"})
+    )
+  )
+};
+
+const STAGE_3={
+  id:3,
+  title:"Validate",
+  xp:130,
+  desc:"Measure product-market fit. Case study: Quibi lost $1.75B by not validating whether people wanted premium short-form video.",
+  assess:[
+    {id:"v4_pass",msg:"PMF score ≥ 40%",icon:"✓"},
+    {id:"v5_pass",msg:"LTV:CAC ratio ≥ 3:1",icon:"✓"},
+    {id:"v6_pass",msg:"Day-7 retention ≥ 20%",icon:"✓"}
+  ],
+  render:(g,u)=>React.createElement("div",null,
+    React.createElement("div",{style:{padding:12,background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`,marginBottom:16}},
+      React.createElement("div",{style:{fontSize:10,fontWeight:700,color:C.text3,textTransform:"uppercase",marginBottom:6}},"📖 FailStory"),
+      React.createElement("div",{style:{fontSize:11,color:C.text2}},
+        "Quibi ($1.75B lost): Raised $1.75B for 'quick bites' of premium video. Never validated demand. Launched during COVID (free entertainment everywhere). Ignored market signals. Folded in 6 months."
+      )
+    ),
+    React.createElement("div",{style:{padding:12,background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`,marginBottom:16}},
+      React.createElement("div",{style:{fontSize:11,fontWeight:700,color:C.text,marginBottom:10}},"📊 Product-Market Fit"),
+      React.createElement(SF,{label:"PMF Score (%)",type:"number",value:g("pmf_score"),onChange:v=>u("pmf_score",v),placeholder:"0-100",gate:true}),
+      React.createElement(Benchmark,{label:"PMF Score",value:g("pmf_score"),good:"40",ok:"25",bad:"10"}),
+      React.createElement(SF,{label:"Day-7 Retention (%)",type:"number",value:g("retention_d7"),onChange:v=>u("retention_d7",v),placeholder:"0-100"}),
+      React.createElement(SF,{label:"Activation Rate (%)",type:"number",value:g("activation_rate"),onChange:v=>u("activation_rate",v),placeholder:"0-100"})
+    ),
+    React.createElement("div",{style:{padding:12,background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`,marginBottom:16}},
+      React.createElement("div",{style:{fontSize:11,fontWeight:700,color:C.text,marginBottom:10}},"💰 Unit Economics"),
+      React.createElement(SF,{label:"CAC (Customer Acquisition Cost)",type:"number",value:g("cac"),onChange:v=>u("cac",v),placeholder:"$",gate:true}),
+      React.createElement(SF,{label:"LTV (Lifetime Value)",type:"number",value:g("ltv"),onChange:v=>u("ltv",v),placeholder:"$",gate:true}),
+      React.createElement(SF,{label:"LTV:CAC Ratio",type:"number",value:g("ltv_cac_ratio"),onChange:v=>u("ltv_cac_ratio",v),placeholder:"3.0",gate:true}),
+      React.createElement(Benchmark,{label:"LTV:CAC",value:g("ltv_cac_ratio"),good:"3.0",ok:"2.0",bad:"1.0"}),
+      React.createElement(SF,{label:"Payback Period (months)",type:"number",value:g("payback"),onChange:v=>u("payback",v),placeholder:"e.g., 12"})
+    ),
+    React.createElement("div",{style:{padding:12,background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`,marginBottom:16}},
+      React.createElement("div",{style:{fontSize:11,fontWeight:700,color:C.text,marginBottom:10}},"💡 Revenue Model"),
+      React.createElement(SF,{label:"Revenue Model",value:g("revenue_model"),onChange:v=>u("revenue_model",v),type:"textarea",placeholder:"Freemium / Premium / B2B / Transactional / etc",gate:true}),
+      React.createElement(SF,{label:"PMF Verdict",value:g("pmf_verdict"),onChange:v=>u("pmf_verdict",v),type:"textarea",placeholder:"Do you have PMF? Why or why not?",gate:true}),
+      React.createElement(SF,{label:"Key Learning",value:g("key_learning"),onChange:v=>u("key_learning",v),type:"textarea",placeholder:"What surprised you?"})
+    )
+  )
+};
+
+const STAGE_4={
+  id:4,
+  title:"Ignite",
+  xp:110,
+  desc:"Launch and acquire your first 10 customers. Case study: Homejoy (on-demand cleaning) launched before validating unit economics. Burned out trying to grow unprofitable.",
+  assess:[
+    {id:"v8_pass",msg:"Beachhead segment identified",icon:"✓"}
+  ],
+  render:(g,u)=>React.createElement("div",null,
+    React.createElement("div",{style:{padding:12,background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`,marginBottom:16}},
+      React.createElement("div",{style:{fontSize:10,fontWeight:700,color:C.text3,textTransform:"uppercase",marginBottom:6}},"📖 FailStory"),
+      React.createElement("div",{style:{fontSize:11,color:C.text2}},
+        "Homejoy (failed): On-demand cleaning. Scaled aggressively before understanding unit economics. CAC > LTV. Burned cash, collapsed. Founders didn't nail the 10 customer loop first."
+      )
+    ),
+    React.createElement(SF,{label:"Beachhead Segment",value:g("beachhead_segment"),onChange:v=>u("beachhead_segment",v),type:"textarea",placeholder:"Most receptive, easiest-to-reach customer segment",gate:true}),
+    React.createElement(SF,{label:"OMTM (One Metric That Matters)",value:g("omtm"),onChange:v=>u("omtm",v),type:"text",placeholder:"e.g., WAU, LTV:CAC, NRR",gate:true}),
+    React.createElement(SF,{label:"Primary Acquisition Channel",value:g("primary_channel"),onChange:v=>u("primary_channel",v),type:"text",placeholder:"Referral / Content / Paid / Sales / Viral / etc",gate:true}),
+    React.createElement(SF,{label:"Pricing Model (first 10)",value:g("pricing_model"),onChange:v=>u("pricing_model",v),type:"text",placeholder:"Free / Freemium / $X / etc",gate:true}),
+    React.createElement(SF,{label:"How to get first 10 customers",value:g("first_10_customers"),onChange:v=>u("first_10_customers",v),type:"textarea",placeholder:"Specific, unscalable tactics (manual outreach, events, etc)",gate:true}),
+    React.createElement(SF,{label:"Retention Strategy",value:g("retention_strategy"),onChange:v=>u("retention_strategy",v),type:"textarea",placeholder:"How do you keep them coming back?"}),
+    React.createElement(SF,{label:"Expansion Playbook",value:g("expansion_playbook"),onChange:v=>u("expansion_playbook",v),type:"textarea",placeholder:"Land → Expand → Retain"})
+  )
+};
+
+const STAGE_5={
+  id:5,
+  title:"Deploy",
+  xp:110,
+  desc:"Build repeatable, scalable processes. Case study: Theranos (blood testing) had no real process, just deception. Processes matter.",
+  assess:[
+    {id:"v7_pass",msg:"Gross margin ≥ 50%",icon:"✓"},
+    {id:"v8_pass",msg:"Sales cycle ≤ 60 days",icon:"✓"},
+    {id:"v9_pass",msg:"Team plan detailed",icon:"✓"}
+  ],
+  render:(g,u)=>React.createElement("div",null,
+    React.createElement("div",{style:{padding:12,background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`,marginBottom:16}},
+      React.createElement("div",{style:{fontSize:10,fontWeight:700,color:C.text3,textTransform:"uppercase",marginBottom:6}},"📖 FailStory"),
+      React.createElement("div",{style:{fontSize:11,color:C.text2}},
+        "Theranos (fraud): Claimed revolutionary blood testing. No real process, just fraud. But the lesson: even real startups fail without repeatable, documented processes. Elizabeth Holmes misled investors instead of building."
+      )
+    ),
+    React.createElement("div",{style:{padding:12,background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`,marginBottom:16}},
+      React.createElement("div",{style:{fontSize:11,fontWeight:700,color:C.text,marginBottom:10}},"🔄 Sales Process"),
+      React.createElement(SF,{label:"Sales Playbook",value:g("sales_playbook"),onChange:v=>u("sales_playbook",v),type:"textarea",placeholder:"Lead source → Qualification → Demo → Close. Step by step.",gate:true}),
+      React.createElement(SF,{label:"Sales Cycle (days)",type:"number",value:g("sales_cycle"),onChange:v=>u("sales_cycle",v),placeholder:"e.g., 30",gate:true}),
+      React.createElement(Benchmark,{label:"Sales Cycle",value:g("sales_cycle"),good:"30",ok:"60",bad:"90"})
+    ),
+    React.createElement("div",{style:{padding:12,background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`,marginBottom:16}},
+      React.createElement("div",{style:{fontSize:11,fontWeight:700,color:C.text,marginBottom:10}},"📚 Learning & Hypotheses"),
+      React.createElement(SF,{label:"Hypothesis Log",value:g("hypothesis_log"),onChange:v=>u("hypothesis_log",v),type:"textarea",placeholder:"H1: Customers value X\nH2: Channel Y will convert at Z%"}),
+      React.createElement(SF,{label:"OKRs",value:g("okrs"),onChange:v=>u("okrs",v),type:"textarea",placeholder:"Objective: Achieve PMF. KR1: 40% score. KR2: 20% D7R."})
+    ),
+    React.createElement("div",{style:{padding:12,background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`,marginBottom:16}},
+      React.createElement("div",{style:{fontSize:11,fontWeight:700,color:C.text,marginBottom:10}},"👥 Scaling & Team"),
+      React.createElement(SF,{label:"Team Plan (next 12 months)",value:g("team_plan"),onChange:v=>u("team_plan",v),type:"textarea",placeholder:"Role | Timeline | Cost | Why. Be specific.",gate:true}),
+      React.createElement(SF,{label:"Expansion Revenue Goal ($)",type:"number",value:g("expansion_revenue"),onChange:v=>u("expansion_revenue",v),placeholder:"12-month revenue target",gate:true})
+    ),
+    React.createElement("div",{style:{padding:12,background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`,marginBottom:16}},
+      React.createElement("div",{style:{fontSize:11,fontWeight:700,color:C.text,marginBottom:10}},"💰 Unit Economics"),
+      React.createElement(SF,{label:"Gross Margin (%)",type:"number",value:g("gross_margin"),onChange:v=>u("gross_margin",v),placeholder:"0-100",gate:true}),
+      React.createElement(Benchmark,{label:"Gross Margin",value:g("gross_margin"),good:"50",ok:"40",bad:"20"})
+    )
+  )
+};
+
+const STAGE_6={
+  id:6,
+  title:"Dominate",
+  xp:120,
+  desc:"Establish market leadership and defensibility. Case study: WeWork ($47B valuation to $0) had no real moat, just real estate arbitrage.",
+  assess:[
+    {id:"v10_pass",msg:"Defensible moat identified",icon:"✓"}
+  ],
+  render:(g,u)=>React.createElement("div",null,
+    React.createElement("div",{style:{padding:12,background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`,marginBottom:16}},
+      React.createElement("div",{style:{fontSize:10,fontWeight:700,color:C.text3,textTransform:"uppercase",marginBottom:6}},"📖 FailStory"),
+      React.createElement("div",{style:{fontSize:11,color:C.text2}},
+        "WeWork ($47B valuation → $0): No moat. Just real estate arbitrage. Once public market scrutinized unit economics, the house of cards collapsed. Lesson: dominance requires defensibility."
+      )
+    ),
+    React.createElement("div",{style:{padding:12,background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`,marginBottom:16}},
+      React.createElement("div",{style:{fontSize:11,fontWeight:700,color:C.text,marginBottom:10}},"🛡️ Market Dominance"),
+      React.createElement(SF,{label:"Market Share (%)",type:"number",value:g("market_share"),onChange:v=>u("market_share",v),placeholder:"0-100"}),
+      React.createElement(SF,{label:"Defensible Moat (Thiel's 7 Powers)",value:g("thiel_moat"),onChange:v=>u("thiel_moat",v),type:"textarea",placeholder:"Network effects / Scale economies / Switching costs / Brand / Proprietary tech / Data / Cornered resources",gate:true})
+    ),
+    React.createElement("div",{style:{padding:12,background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`,marginBottom:16}},
+      React.createElement("div",{style:{fontSize:11,fontWeight:700,color:C.text,marginBottom:10}},"📈 Financial Health"),
+      React.createElement(SF,{label:"ARR / MRR ($)",value:g("arr_mrr"),onChange:v=>u("arr_mrr",v),type:"text",placeholder:"Annual or Monthly Recurring Revenue",gate:true}),
+      React.createElement(SF,{label:"Analytics Level",value:g("analytics_level"),onChange:v=>u("analytics_level",v),type:"text",placeholder:"Basic / Intermediate / World-class",gate:true}),
+      React.createElement(SF,{label:"Data-Driven Decisions",value:g("data_driven_decision"),onChange:v=>u("data_driven_decision",v),type:"textarea",placeholder:"How do you use data to decide?"}),
+      React.createElement(SF,{label:"Exit Strategy",value:g("exit_strategy"),onChange:v=>u("exit_strategy",v),type:"textarea",placeholder:"IPO / Acquisition / Profitability / Buyback"})
+    ),
+    React.createElement("div",{style:{padding:12,background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`,marginBottom:16}},
+      React.createElement("div",{style:{fontSize:11,fontWeight:700,color:C.text,marginBottom:10}},"🚀 Vision & Projection"),
+      React.createElement(SF,{label:"10-Year Vision",value:g("vision_10yr"),onChange:v=>u("vision_10yr",v),type:"textarea",placeholder:"Where will you be in 10 years? Who will you be for?",gate:true})
+    )
+  )
+};
+
+// Build STAGES array
+const STAGES=[STAGE_0,STAGE_1,STAGE_2,STAGE_3,STAGE_4,STAGE_5,STAGE_6];
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// VCHECKS - Validation checks for investor readiness
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const VCHECKS=[
+  {id:"v1",stage:0,field:"problem_statement",check:d=>(d.problem_statement||"").length>=50,msg:"Problem statement needs more depth (50+ chars)"},
+  {id:"v2",stage:1,field:"interviews_count",check:d=>parseInt(d.interviews_count||0)>=15,msg:"Minimum 15 customer interviews required"},
+  {id:"v3",stage:2,field:"must_have",check:d=>((d.must_have||"").match(/\n/g)||[]).length<=3,msg:"Maximum 3 features for v1!"},
+  {id:"v4",stage:3,field:"pmf_score",check:d=>parseFloat(d.pmf_score||0)>=40,msg:"PMF score below 40% — you don't have product-market fit"},
+  {id:"v5",stage:3,field:"ltv_cac_ratio",check:d=>parseFloat(d.ltv_cac_ratio||0)>=3,msg:"LTV:CAC below 3:1 — unsustainable unit economics"},
+  {id:"v6",stage:3,field:"retention_d7",check:d=>parseFloat(d.retention_d7||0)>=20,msg:"Day-7 retention below 20% — users aren't coming back"},
+  {id:"v7",stage:5,field:"gross_margin",check:d=>parseFloat(d.gross_margin||0)>=50,msg:"Gross margin below 50% — not enough margin to sustain scaling"},
+  {id:"v8",stage:5,field:"sales_cycle",check:d=>parseInt(d.sales_cycle||999)<=60,msg:"Sales cycle > 60 days — too long for repeatable scaling"},
+  {id:"v9",stage:5,field:"team_plan",check:d=>(d.team_plan||"").length>=50,msg:"Team plan needs detail on roles, timing, ROI"},
+  {id:"v10",stage:6,field:"thiel_moat",check:d=>(d.thiel_moat||"").length>=80,msg:"Moat needs specifics — which of Thiel's 7 powers do you have?"}
+];
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// runXV - Cross-validation across all stages
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function runXV(data){
+  const issues=[];
+  for(let v of VCHECKS){
+    if(!v.check(data)){
+      issues.push({vcheck:v.id,stage:v.stage,msg:v.msg,severity:"warning"});
+    }
+  }
+  return{passed:issues.length===0,issues:issues};
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// calcIRS - Investor Readiness Score
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function calcIRS(data){
+  let score=0;
+  const weights={0:120,1:120,2:110,3:130,4:110,5:110,6:120};
+  const maxScore=Object.values(weights).reduce((a,b)=>a+b,0);
+
+  for(let i=0;i<STAGES.length;i++){
+    const criteria=GATE_CRITERIA[i]||[];
+    let stagePass=0;
+    for(let c of criteria){
+      const val=data[c.field]||"";
+      let pass=false;
+      if(c.check==="required")pass=val.length>0;
+      else if(c.check.startsWith("minLength:"))pass=val.length>=parseInt(c.check.split(":")[1]);
+      else if(c.check.startsWith("minValue:"))pass=parseFloat(val||0)>=parseFloat(c.check.split(":")[1]);
+      else if(c.check.startsWith("maxValue:"))pass=parseInt(val||999)<=parseInt(c.check.split(":")[1]);
+      if(pass)stagePass++;
+    }
+    const stageScore=(stagePass/criteria.length)*weights[i];
+    score+=stageScore;
+  }
+
+  let band="Pre-Seed";
+  let bandColor=C.red;
+  if(score>=500){band="Late-Stage";bandColor=C.green;}
+  else if(score>=400){band="Growth";bandColor=C.yellow;}
+  else if(score>=300){band="Series A";bandColor=C.yellow;}
+  else if(score>=200){band="Seed";bandColor=C.orange;}
+  else if(score>=100){band="MVP";bandColor=C.orange;}
+
+  return{score:Math.round(score),maxScore:maxScore,pct:Math.round((score/maxScore)*100),band:band,bandColor:bandColor};
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// InvestorReadiness Component
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function InvestorReadiness({data}){
+  const irs=calcIRS(data);
+  return React.createElement("div",{style:{padding:12,background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`}},
+    React.createElement("div",{style:{fontSize:10,fontWeight:700,color:C.text3,textTransform:"uppercase",marginBottom:8}},"📊 Investor Readiness Score"),
+    React.createElement("div",{style:{display:"flex",alignItems:"center",gap:10,marginBottom:8}},
+      React.createElement("div",{style:{fontSize:28,fontWeight:700,color:irs.bandColor}},irs.score),
+      React.createElement("div",null,
+        React.createElement("div",{style:{fontSize:11,fontWeight:700,color:C.text}},`${irs.pct}% • ${irs.band}`),
+        React.createElement("div",{style:{fontSize:9,color:C.text3}},`${irs.score} / ${irs.maxScore} points`)
+      )
+    ),
+    React.createElement("div",{style:{height:6,background:C.bg,borderRadius:3,overflow:"hidden",marginBottom:10}},
+      React.createElement("div",{style:{height:"100%",width:`${irs.pct}%`,background:irs.bandColor,transition:"width 0.3s"}})
+    ),
+    React.createElement("div",{style:{fontSize:9,color:C.text3}},
+      "Stages unlocked × gate completion → readiness"
+    )
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MarketplaceTouchpoint Component
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function MarketplaceTouchpoint({stage,irs}){
+  const touchpoints=[
+    {stage:0,type:"Advisor",role:"Problem validator",icon:"🎓"},
+    {stage:1,type:"Mentor",role:"Customer interview coach",icon:"👨‍🏫"},
+    {stage:2,type:"Designer",role:"Value prop & prototype",icon:"🎨"},
+    {stage:3,type:"Data analyst",role:"PMF measurement",icon:"📊"},
+    {stage:4,type:"Sales expert",role:"First 10 customers",icon:"🤝"},
+    {stage:5,type:"Operations",role:"Process & scaling",icon:"⚙️"},
+    {stage:6,type:"Investor",role:"Board seat & fundraising",icon:"💰"}
+  ];
+  const tp=touchpoints[stage];
+  return React.createElement("div",{style:{marginTop:16,padding:12,background:C.bg3,borderRadius:8,border:`1px solid ${C.border}`}},
+    React.createElement("div",{style:{fontSize:10,fontWeight:700,color:C.text3,textTransform:"uppercase",marginBottom:8}},"🤝 Expert You Need Now"),
+    React.createElement("div",{style:{display:"flex",alignItems:"center",gap:10}},
+      React.createElement("div",{style:{fontSize:28}},tp.icon),
+      React.createElement("div",null,
+        React.createElement("div",{style:{fontSize:11,fontWeight:700,color:C.text}},tp.type),
+        React.createElement("div",{style:{fontSize:10,color:C.text3}},tp.role)
+      )
+    )
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// GeniePanel Component - Mobile responsive (drawer + desktop panel)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function GeniePanel({data,stageIdx,unlocked,onSendMessage,genieMessages,isLoading,isMobile,showGenie,onToggleGenie}){
+  const panelRef=useRef(null);
+  const inputRef=useRef(null);
+
+  useEffect(()=>{
+    if(panelRef.current)panelRef.current.scrollTop=panelRef.current.scrollHeight;
+  },[genieMessages]);
+
+  if(isMobile){
+    return React.createElement("div",{style:{position:"fixed",bottom:0,left:0,right:0,maxHeight:showGenie?"60vh":"48px",background:C.bg2,borderTop:`1px solid ${C.border}`,transition:"max-height 0.3s ease",zIndex:200,display:"flex",flexDirection:"column",overflow:"hidden"}},
+      React.createElement("button",{onClick:onToggleGenie,style:{padding:"12px 16px",display:"flex",alignItems:"center",justifyContent:"space-between",background:"transparent",border:"none",color:C.text,cursor:"pointer",minHeight:48}},
+        React.createElement("span",{style:{fontSize:12,fontWeight:700,color:C.text3,textTransform:"uppercase"}},"🧠 Genie AI"),
+        React.createElement("span",{style:{fontSize:14,color:C.text3}},showGenie?"▼":"▲")
+      ),
+      React.createElement("div",{ref:panelRef,style:{flex:1,overflowY:"auto",padding:12,display:"flex",flexDirection:"column",gap:8}},
+        genieMessages.map((m,i)=>
+          React.createElement("div",{key:i,style:{padding:10,borderRadius:8,background:m.role==="user"?C.brand+"20":C.bg3,textAlign:m.role==="user"?"right":"left",borderLeft:m.role==="assistant"?`3px solid ${C.brand}`:"none"}},
+            React.createElement("div",{style:{fontSize:12,color:C.text,lineHeight:1.5}},m.content)
+          )
+        )
+      ),
+      React.createElement("div",{style:{padding:10,borderTop:`1px solid ${C.border}`,display:"flex",gap:8}},
+        React.createElement("input",{ref:inputRef,type:"text",placeholder:"Ask Genie...",onKeyDown:e=>{if(e.key==="Enter"&&inputRef.current.value){onSendMessage(inputRef.current.value);inputRef.current.value="";}},style:{flex:1,padding:"10px 12px",borderRadius:6,background:C.bg,border:`1px solid ${C.border}`,color:C.text,fontSize:14,outline:"none",minHeight:44}}),
+        React.createElement("button",{onClick:()=>{if(inputRef.current.value){onSendMessage(inputRef.current.value);inputRef.current.value="";}},disabled:isLoading,style:{padding:"10px 16px",borderRadius:6,background:C.brand,color:C.text,fontSize:12,fontWeight:700,border:"none",cursor:isLoading?"not-allowed":"pointer",opacity:isLoading?0.6:1,minWidth:44,minHeight:44}},"→")
+      )
+    );
+  }
+
+  return React.createElement("div",{style:{position:"absolute",right:0,top:60,bottom:0,width:320,background:C.bg2,borderLeft:`1px solid ${C.border}`,display:"flex",flexDirection:"column",zIndex:100}},
+    React.createElement("div",{style:{padding:12,fontSize:11,fontWeight:700,color:C.text3,textTransform:"uppercase",borderBottom:`1px solid ${C.border}`}},"🧠 Genie"),
+    React.createElement("div",{ref:panelRef,style:{flex:1,overflowY:"auto",padding:12,display:"flex",flexDirection:"column",gap:8}},
+      genieMessages.map((m,i)=>
+        React.createElement("div",{key:i,style:{padding:8,borderRadius:6,background:m.role==="user"?C.brand+"20":C.bg3,textAlign:m.role==="user"?"right":"left",borderLeft:m.role==="assistant"?`2px solid ${C.brand}`:"none"}},
+          React.createElement("div",{style:{fontSize:10,color:C.text,lineHeight:1.4}},m.content)
+        )
+      )
+    ),
+    React.createElement("div",{style:{padding:10,borderTop:`1px solid ${C.border}`,display:"flex",gap:6}},
+      React.createElement("input",{ref:inputRef,type:"text",placeholder:"Ask Genie...",onKeyDown:e=>{if(e.key==="Enter"&&inputRef.current.value){onSendMessage(inputRef.current.value);inputRef.current.value="";}},style:{flex:1,padding:"8px 10px",borderRadius:4,background:C.bg,border:`1px solid ${C.border}`,color:C.text,fontSize:11,outline:"none"}}),
+      React.createElement("button",{onClick:()=>{if(inputRef.current.value){onSendMessage(inputRef.current.value);inputRef.current.value="";}},disabled:isLoading,style:{padding:"8px 12px",borderRadius:4,background:C.brand,color:C.text,fontSize:10,fontWeight:600,border:"none",cursor:isLoading?"not-allowed":"pointer",opacity:isLoading?0.6:1,minHeight:44}},">")
+    )
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SettingsModal Component
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function SettingsModal({open,onClose,onSave,initialKey=""}){
+  const [key,setKey]=useState(initialKey);
+  if(!open)return null;
+  return React.createElement("div",{style:{position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:400}},
+    React.createElement("div",{style:{background:C.bg2,border:`1px solid ${C.border}`,borderRadius:12,padding:20,maxWidth:400,width:"90%"}},
+      React.createElement("div",{style:{fontSize:16,fontWeight:700,marginBottom:14}},"🔑 API Key"),
+      React.createElement("div",{style:{fontSize:12,color:C.text3,marginBottom:14}},
+        "Enter your Anthropic API key to unlock Genie AI coaching throughout your stages."
+      ),
+      React.createElement("input",{type:"password",value:key,onChange:e=>setKey(e.target.value),placeholder:"sk-ant-...",style:{width:"100%",padding:"10px 12px",borderRadius:8,background:C.bg,border:`1px solid ${C.border}`,color:C.text,fontSize:14,marginBottom:16,boxSizing:"border-box",minHeight:44}}),
+      React.createElement("div",{style:{display:"flex",gap:10}},
+        React.createElement("button",{onClick:onClose,style:{flex:1,padding:"12px 16px",borderRadius:8,background:C.border,color:C.text,fontSize:14,fontWeight:600,border:"none",cursor:"pointer",minHeight:48}},"Cancel"),
+        React.createElement("button",{onClick:()=>onSave(key),style:{flex:1,padding:"12px 16px",borderRadius:8,background:C.brand,color:C.text,fontSize:14,fontWeight:700,border:"none",cursor:"pointer",minHeight:48}},"Save")
+      )
+    )
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Assess Component - Validation and advancement
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function Assess({stageIdx,data,onAdvance}){
+  const stage=STAGES[stageIdx];
+  const xv=runXV(data);
+  const issues=xv.issues.filter(i=>i.stage===stageIdx);
+
+  return React.createElement("div",null,
+    React.createElement("div",{style:{fontSize:16,fontWeight:700,marginBottom:12}},
+      `✅ ${stage.title} Assessment`
+    ),
+    React.createElement("div",{style:{fontSize:12,color:C.text3,marginBottom:16}},
+      "Review your validation checklist before advancing."
+    ),
+    React.createElement("div",{style:{padding:14,background:C.bg3,borderRadius:10,border:`1px solid ${C.border}`,marginBottom:16}},
+      React.createElement("div",{style:{fontSize:12,fontWeight:700,color:C.text,marginBottom:10}},"Critical Gates"),
+      stage.assess.map((a,i)=>
+        React.createElement("div",{key:i,style:{display:"flex",gap:8,alignItems:"center",marginBottom:6}},
+          React.createElement("span",{style:{fontSize:14,fontWeight:700}},a.icon),
+          React.createElement("span",{style:{fontSize:11,color:C.text2}},a.msg)
+        )
+      )
+    ),
+    issues.length>0&&React.createElement("div",{style:{padding:14,background:C.red+"20",border:`1px solid ${C.red}`,borderRadius:10,marginBottom:16}},
+      React.createElement("div",{style:{fontSize:11,fontWeight:700,color:C.red,marginBottom:8}},"⚠️ Review These Issues"),
+      issues.map((i,idx)=>
+        React.createElement("div",{key:idx,style:{fontSize:10,color:C.text2,marginBottom:4}},
+          `• ${i.msg}`
+        )
+      )
+    ),
+    React.createElement("button",{onClick:onAdvance,style:{width:"100%",padding:"14px 16px",borderRadius:8,background:C.brand,color:C.text,fontSize:14,fontWeight:700,border:"none",cursor:"pointer",minHeight:48,marginBottom:8}},
+      `✨ Advance to ${stageIdx<STAGES.length-1?STAGES[stageIdx+1].title:"Final Stage"}`
+    ),
+    stageIdx>0&&React.createElement("button",{onClick:()=>window.history.back(),style:{width:"100%",padding:"12px 16px",borderRadius:8,background:C.border,color:C.text,fontSize:12,fontWeight:600,border:"none",cursor:"pointer",minHeight:44}},
+      "Back to Build"
+    )
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MAIN APP COMPONENT - Mobile responsive with desktop fallback
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function App(){
+  const isMobile=useIsMobile();
+  const [tab,setTab]=useState("home");
+  const [stageIdx,setStageIdx]=useState(0);
+  const [data,setData]=useState(()=>{
+    const saved=localStorage.getItem("validately_data");
+    return saved?JSON.parse(saved):{venture_name:""};
+  });
+  const [unlocked,setUnlocked]=useState(()=>{
+    const saved=localStorage.getItem("validately_unlocked");
+    return saved?JSON.parse(saved):[0];
+  });
+  const [xp,setXP]=useState(()=>parseInt(localStorage.getItem("validately_xp")||"0"));
+  const [showSettings,setShowSettings]=useState(false);
+  const [apiKey,setApiKey]=useState(localStorage.getItem("validately_apiKey")||"");
+  const [genieMessages,setGenieMessages]=useState([]);
+  const [isLoading,setIsLoading]=useState(false);
+  const [showGenie,setShowGenie]=useState(false);
+  const [showSidebar,setShowSidebar]=useState(false);
+  const [firedTriggers,setFiredTriggers]=useState(()=>{
+    const saved=localStorage.getItem("validately_firedTriggers");
+    return saved?new Set(JSON.parse(saved)):new Set();
+  });
+  const lastChangeRef=useRef(null);
+
+  const update=(k,v)=>{
+    const nd={...data,[k]:v};
+    setData(nd);
+    localStorage.setItem("validately_data",JSON.stringify(nd));
+    lastChangeRef.current={field:k,value:v,time:Date.now()};
+  };
+
+  const saveSettings=(key)=>{
+    setApiKey(key);
+    localStorage.setItem("validately_apiKey",key);
+    setShowSettings(false);
+  };
+
+  const advanceStage=()=>{
+    const newXP=xp+STAGES[stageIdx].xp;
+    setXP(newXP);
+    localStorage.setItem("validately_xp",newXP);
+    if(!unlocked.includes(stageIdx+1)){
+      const newUnlocked=[...unlocked,stageIdx+1];
+      setUnlocked(newUnlocked);
+      localStorage.setItem("validately_unlocked",JSON.stringify(newUnlocked));
+    }
+    if(stageIdx<STAGES.length-1){
+      setStageIdx(stageIdx+1);
+      setTab("build");
+    }
+  };
+
+  const sendGenieMessage=async(msg)=>{
+    const newMessages=[...genieMessages,{role:"user",content:msg}];
+    setGenieMessages(newMessages);
+    setIsLoading(true);
+    const stageName=STAGES[stageIdx].title;
+    const sysMod=`${AI_SYS}\n\nCurrent Stage: ${stageName} (Stage ${stageIdx+1}/7). User data: ${JSON.stringify(data).substring(0,500)}`;
+    const response=await askAI(apiKey,sysMod,msg);
+    setGenieMessages([...newMessages,{role:"assistant",content:response}]);
+    setIsLoading(false);
+  };
+
+  // Proactive Genie - auto-fires when key fields reach thresholds
+  useEffect(()=>{
+    if(!apiKey||isLoading||tab!=="build")return;
+    for(const trigger of PROACTIVE_TRIGGERS){
+      if(trigger.stage!==stageIdx)continue;
+      const val=data[trigger.field]||"";
+      const triggerKey=`${trigger.stage}_${trigger.field}`;
+      if(val.length>=trigger.minLength&&!firedTriggers.has(triggerKey)){
+        setFiredTriggers(prev=>{
+          const newSet=new Set([...prev,triggerKey]);
+          localStorage.setItem("validately_firedTriggers",JSON.stringify(Array.from(newSet)));
+          return newSet;
+        });
+        setTimeout(async()=>{
+          const prompt=trigger.prompt(val,data);
+          const stageName=STAGES[stageIdx].title;
+          const sysPrompt=`${AI_SYS}\n\nCurrent Stage: ${stageName} (Stage ${stageIdx+1}/7).\nYou are proactively reviewing the user's input. Be specific, reference real startups, include numbers. Start your response with "🧠 Genie Review:" followed by your analysis.\n\nUser data so far: ${JSON.stringify(data).substring(0,800)}`;
+          setIsLoading(true);
+          setShowGenie(true);
+          const genieIntro=`🧠 [Auto-reviewing your ${trigger.field.replace(/_/g,' ')}...]`;
+          setGenieMessages(prev=>[...prev,{role:"assistant",content:genieIntro}]);
+          const response=await askAI(apiKey,sysPrompt,prompt);
+          setGenieMessages(prev=>[...prev,{role:"assistant",content:response}]);
+          setIsLoading(false);
+        },1500);
+        break;
+      }
+    }
+  },[data,stageIdx,apiKey,tab,firedTriggers]);
+
+  // Buzzword detector - fires instantly when buzzwords detected
+  useEffect(()=>{
+    if(!apiKey||isLoading||!lastChangeRef.current)return;
+    const {value,time}=lastChangeRef.current;
+    if(Date.now()-time>2000)return;
+    for(const trigger of GENIE_TRIGGERS){
+      if(trigger.pattern.test(value)){
+        const buzzKey=`buzz_${trigger.msg.substring(0,20)}`;
+        if(firedTriggers.has(buzzKey))continue;
+        setFiredTriggers(prev=>{
+          const newSet=new Set([...prev,buzzKey]);
+          localStorage.setItem("validately_firedTriggers",JSON.stringify(Array.from(newSet)));
+          return newSet;
+        });
+        setShowGenie(true);
+        setGenieMessages(prev=>[...prev,{role:"assistant",content:`⚡ ${trigger.msg}`}]);
+        break;
+      }
+    }
+  },[data,firedTriggers,apiKey,isLoading]);
+
+  const lv=getLv(xp);
+  const irs=calcIRS(data);
+
+  // Gate check helper
+  const gateChecks=(GATE_CRITERIA[stageIdx]||[]).map((gc)=>{
+    const val=data[gc.field]||"";
+    let pass=false;
+    if(gc.check==="required")pass=val.length>0;
+    else if(gc.check.startsWith("minLength:"))pass=val.length>=parseInt(gc.check.split(":")[1]);
+    else if(gc.check.startsWith("minValue:"))pass=parseFloat(val||0)>=parseFloat(gc.check.split(":")[1]);
+    else if(gc.check.startsWith("maxValue:"))pass=parseInt(val||999)<=parseInt(gc.check.split(":")[1]);
+    return{...gc,pass};
+  });
+
+  // ═══ MOBILE LAYOUT ═══
+  if(isMobile){
+    return React.createElement("div",{style:{minHeight:"100vh",background:C.bg,color:C.text,fontFamily:"system-ui,sans-serif",paddingBottom:apiKey?60:0}},
+      // Top bar (mobile)
+      React.createElement("div",{style:{position:"sticky",top:0,zIndex:150,background:C.bg2,borderBottom:`1px solid ${C.border}`,padding:"10px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}},
+        React.createElement("div",{style:{display:"flex",alignItems:"center",gap:10}},
+          React.createElement("button",{onClick:()=>setShowSidebar(!showSidebar),style:{background:"transparent",border:"none",color:C.text,fontSize:20,cursor:"pointer",padding:4,minWidth:44,minHeight:44,display:"flex",alignItems:"center",justifyContent:"center"}},"☰"),
+          React.createElement("div",null,
+            React.createElement("div",{style:{fontSize:14,fontWeight:700}},data.venture_name||"Validately"),
+            React.createElement("div",{style:{fontSize:10,color:C.text3}},`${lv.ic} ${lv.n} • ${xp} XP`)
+          )
+        ),
+        React.createElement("div",{style:{display:"flex",gap:6}},
+          React.createElement("button",{onClick:()=>setShowSettings(true),style:{minWidth:44,minHeight:44,borderRadius:8,background:C.border,color:C.text,fontSize:16,border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}},"⚙️")
+        )
+      ),
+
+      // Tab bar (mobile)
+      React.createElement("div",{style:{display:"flex",background:C.bg2,borderBottom:`1px solid ${C.border}`,overflow:"hidden"}},
+        ["home","build","assess"].map(t=>
+          React.createElement("button",{
+            key:t,
+            onClick:()=>setTab(t),
+            style:{flex:1,padding:"12px 0",background:tab===t?C.brand+"20":"transparent",color:tab===t?C.brand:C.text3,fontSize:12,fontWeight:700,border:"none",borderBottom:tab===t?`2px solid ${C.brand}`:"2px solid transparent",cursor:"pointer",textTransform:"uppercase",letterSpacing:0.5,minHeight:44}
+          },t)
+        )
+      ),
+
+      // Sidebar overlay (mobile)
+      showSidebar&&React.createElement("div",{style:{position:"fixed",inset:0,zIndex:300,display:"flex"}},
+        React.createElement("div",{onClick:()=>setShowSidebar(false),style:{position:"absolute",inset:0,background:"rgba(0,0,0,0.6)"}}),
+        React.createElement("div",{style:{position:"relative",width:280,background:C.bg2,height:"100%",overflowY:"auto",padding:16,zIndex:1}},
+          React.createElement("div",{style:{fontSize:14,fontWeight:700,marginBottom:16,display:"flex",justifyContent:"space-between",alignItems:"center"}},
+            "📍 Stages",
+            React.createElement("button",{onClick:()=>setShowSidebar(false),style:{background:"transparent",border:"none",color:C.text3,fontSize:18,cursor:"pointer",minWidth:44,minHeight:44}},"✕")
+          ),
+          STAGE_META.map(s=>
+            React.createElement("button",{
+              key:s.id,
+              onClick:()=>{if(unlocked.includes(s.id)){setStageIdx(s.id);setTab("build");setShowSidebar(false);}},
+              disabled:!unlocked.includes(s.id),
+              style:{width:"100%",padding:14,marginBottom:8,borderRadius:8,background:stageIdx===s.id?s.color+"30":C.bg3,border:`1px solid ${stageIdx===s.id?s.color:"transparent"}`,color:C.text,fontSize:13,fontWeight:600,cursor:unlocked.includes(s.id)?"pointer":"not-allowed",opacity:unlocked.includes(s.id)?1:0.4,textAlign:"left",minHeight:44}
+            },
+              `${s.icon} ${s.phase}`,
+              !unlocked.includes(s.id)&&React.createElement("span",{style:{fontSize:10,marginLeft:6}},"🔒")
+            )
+          ),
+          React.createElement("div",{style:{marginTop:20,borderTop:`1px solid ${C.border}`,paddingTop:16}},
+            React.createElement(InvestorReadiness,{data:data})
+          )
+        )
+      ),
+
+      // Content (mobile)
+      React.createElement("div",{style:{padding:16}},
+        tab==="home"&&React.createElement("div",null,
+          React.createElement("div",{style:{fontSize:22,fontWeight:700,marginBottom:12}},"🚀 Validately"),
+          React.createElement("div",{style:{fontSize:14,lineHeight:1.6,marginBottom:20,color:C.text2}},
+            "MIT Design X + Sean Ellis PMF + Thiel. 7 stages from problem validation to domination."
+          ),
+          React.createElement(InvestorReadiness,{data:data}),
+          React.createElement("div",{style:{marginTop:16,display:"flex",flexDirection:"column",gap:10}},
+            STAGE_META.map(s=>
+              React.createElement("button",{
+                key:s.id,
+                onClick:()=>{if(unlocked.includes(s.id)){setStageIdx(s.id);setTab("build");}},
+                disabled:!unlocked.includes(s.id),
+                style:{padding:14,borderRadius:10,background:C.bg3,border:`1px solid ${C.border}`,color:C.text,textAlign:"left",cursor:unlocked.includes(s.id)?"pointer":"not-allowed",opacity:unlocked.includes(s.id)?1:0.4,minHeight:48}
+              },
+                React.createElement("div",{style:{fontSize:15,fontWeight:700,marginBottom:2}},`${s.icon} ${s.phase}`),
+                React.createElement("div",{style:{fontSize:11,color:C.text3}},s.tagline)
+              )
+            )
+          )
+        ),
+
+        tab==="build"&&React.createElement("div",null,
+          React.createElement("div",{style:{fontSize:18,fontWeight:700,marginBottom:6}},
+            `${STAGE_META[stageIdx].icon} ${STAGES[stageIdx].title}`
+          ),
+          React.createElement("div",{style:{fontSize:12,color:C.text3,marginBottom:16}},STAGES[stageIdx].desc),
+          STAGES[stageIdx].render((k)=>data[k]||"",update),
+          React.createElement(MarketplaceTouchpoint,{stage:stageIdx,irs:irs}),
+          React.createElement("div",{style:{marginTop:24,padding:16,background:C.bg3,borderRadius:10,border:`1px solid ${C.border}`}},
+            React.createElement("div",{style:{fontSize:12,fontWeight:700,color:C.text,marginBottom:12}},
+              `📋 Stage ${stageIdx+1} Gate Requirements`
+            ),
+            gateChecks.map((gc,i)=>
+              React.createElement("div",{key:i,style:{display:"flex",gap:8,alignItems:"center",marginBottom:8}},
+                React.createElement("span",{style:{fontSize:14,color:gc.pass?C.green:C.red,fontWeight:700}},gc.pass?"✓":"✗"),
+                React.createElement("span",{style:{fontSize:11,color:gc.pass?C.text2:C.text3}},gc.msg)
+              )
+            ),
+            React.createElement("div",{style:{display:"flex",gap:8,marginTop:16,flexDirection:"column"}},
+              React.createElement("button",{
+                onClick:()=>setTab("assess"),
+                style:{width:"100%",padding:"12px 16px",borderRadius:8,background:C.brand,color:C.text,fontSize:13,fontWeight:700,border:"none",cursor:"pointer",minHeight:44}
+              },"Continue to Assessment →"),
+              stageIdx>0&&React.createElement("button",{
+                onClick:()=>setStageIdx(stageIdx-1),
+                style:{width:"100%",padding:"12px 16px",borderRadius:8,background:C.border,color:C.text,fontSize:12,fontWeight:600,border:"none",cursor:"pointer",minHeight:44}
+              },"← Previous")
+            )
+          )
+        ),
+
+        tab==="assess"&&React.createElement(Assess,{stageIdx:stageIdx,data:data,onAdvance:advanceStage})
+      ),
+
+      // Genie drawer (mobile)
+      apiKey&&React.createElement(GeniePanel,{data:data,stageIdx:stageIdx,unlocked:unlocked,onSendMessage:sendGenieMessage,genieMessages:genieMessages,isLoading:isLoading,isMobile:true,showGenie:showGenie,onToggleGenie:()=>setShowGenie(!showGenie)}),
+
+      // Settings modal
+      React.createElement(SettingsModal,{open:showSettings,onClose:()=>setShowSettings(false),onSave:saveSettings,initialKey:apiKey})
+    );
+  }
+
+  // ═══ DESKTOP LAYOUT ═══
+  return React.createElement("div",{style:{display:"flex",height:"100vh",background:C.bg,color:C.text,fontFamily:"system-ui,sans-serif"}},
+    // Left Sidebar
+    React.createElement("div",{style:{width:200,background:C.bg2,borderRight:`1px solid ${C.border}`,padding:12,overflowY:"auto",flexShrink:0}},
+      React.createElement("div",{style:{fontSize:13,fontWeight:700,marginBottom:12}},"📍 Stages"),
+      STAGE_META.map(s=>
+        React.createElement("button",{
+          key:s.id,
+          onClick:()=>{if(unlocked.includes(s.id)){setStageIdx(s.id);setTab("build");}},
+          disabled:!unlocked.includes(s.id),
+          style:{width:"100%",padding:10,marginBottom:6,borderRadius:6,background:stageIdx===s.id?s.color+"30":C.bg3,border:`1px solid ${stageIdx===s.id?s.color:"transparent"}`,color:C.text,fontSize:11,fontWeight:600,cursor:unlocked.includes(s.id)?"pointer":"not-allowed",opacity:unlocked.includes(s.id)?1:0.5,textAlign:"left",minHeight:44}
+        },
+          `${s.icon} ${s.phase}`,
+          !unlocked.includes(s.id)&&React.createElement("span",{style:{fontSize:9,marginLeft:4}},"🔒")
+        )
+      ),
+      React.createElement("div",{style:{marginTop:20,borderTop:`1px solid ${C.border}`,paddingTop:12}},
+        React.createElement(InvestorReadiness,{data:data})
+      )
+    ),
+
+    // Center column
+    React.createElement("div",{style:{flex:1,display:"flex",flexDirection:"column",position:"relative",minWidth:0}},
+      // Top bar
+      React.createElement("div",{style:{height:60,background:C.bg2,borderBottom:`1px solid ${C.border}`,display:"flex",alignItems:"center",padding:"0 20px",justifyContent:"space-between",flexShrink:0}},
+        React.createElement("div",null,
+          React.createElement("div",{style:{fontSize:14,fontWeight:700}},data.venture_name||"Validately"),
+          React.createElement("div",{style:{fontSize:10,color:C.text3}},`${lv.ic} ${lv.n} • ${xp} XP`)
+        ),
+        React.createElement("div",{style:{display:"flex",gap:8}},
+          ["home","build","assess"].map(t=>
+            React.createElement("button",{
+              key:t,
+              onClick:()=>setTab(t),
+              style:{padding:"8px 14px",borderRadius:6,background:tab===t?C.brand:C.border,color:C.text,fontSize:10,fontWeight:600,border:"none",cursor:"pointer",minHeight:44}
+            },t.charAt(0).toUpperCase()+t.slice(1))
+          ),
+          React.createElement("button",{onClick:()=>setShowSettings(true),style:{padding:"8px 14px",borderRadius:6,background:C.border,color:C.text,fontSize:13,border:"none",cursor:"pointer",minHeight:44}},"⚙️")
+        )
+      ),
+
+      // Content
+      React.createElement("div",{style:{flex:1,overflowY:"auto",padding:20,paddingRight:apiKey?340:20}},
+        tab==="home"&&React.createElement("div",null,
+          React.createElement("div",{style:{fontSize:20,fontWeight:700,marginBottom:12}},"🚀 Validately"),
+          React.createElement("div",{style:{fontSize:13,lineHeight:1.6,marginBottom:20}},
+            "MIT Design X methodology + Sean Ellis PMF + Thiel frameworks. 7 stages from problem validation to domination."
+          ),
+          React.createElement("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}},
+            STAGE_META.map(s=>
+              React.createElement("div",{key:s.id,style:{background:C.bg3,borderRadius:8,padding:12,border:`1px solid ${C.border}`}},
+                React.createElement("div",{style:{fontSize:13,fontWeight:700,marginBottom:4}},`${s.icon} ${s.phase}`),
+                React.createElement("div",{style:{fontSize:10,color:C.text3}},s.tagline)
+              )
+            )
+          )
+        ),
+
+        tab==="build"&&React.createElement("div",null,
+          React.createElement("div",{style:{fontSize:16,fontWeight:700,marginBottom:8}},
+            `${STAGE_META[stageIdx].icon} ${STAGES[stageIdx].title}`
+          ),
+          React.createElement("div",{style:{fontSize:11,color:C.text3,marginBottom:16}},STAGES[stageIdx].desc),
+          STAGES[stageIdx].render((k)=>data[k]||"",update),
+          React.createElement(MarketplaceTouchpoint,{stage:stageIdx,irs:irs}),
+          React.createElement("div",{style:{marginTop:24,padding:16,background:C.bg3,borderRadius:10,border:`1px solid ${C.border}`}},
+            React.createElement("div",{style:{fontSize:11,fontWeight:700,color:C.text,marginBottom:10}},`📋 Stage ${stageIdx+1} Gate Requirements`),
+            gateChecks.map((gc,i)=>
+              React.createElement("div",{key:i,style:{display:"flex",gap:8,alignItems:"center",marginBottom:6}},
+                React.createElement("span",{style:{fontSize:11,color:gc.pass?C.green:C.red,fontWeight:700}},gc.pass?"✓":"✗"),
+                React.createElement("span",{style:{fontSize:10,color:gc.pass?C.text2:C.text3}},gc.msg)
+              )
+            ),
+            React.createElement("div",{style:{display:"flex",gap:8,marginTop:14}},
+              React.createElement("button",{
+                onClick:()=>setTab("assess"),
+                style:{flex:1,padding:"10px 16px",borderRadius:6,background:C.brand,color:C.text,fontSize:11,fontWeight:700,border:"none",cursor:"pointer",minHeight:44}
+              },"Continue to Assessment →"),
+              stageIdx>0&&React.createElement("button",{
+                onClick:()=>setStageIdx(stageIdx-1),
+                style:{padding:"10px 16px",borderRadius:6,background:C.border,color:C.text,fontSize:11,fontWeight:600,border:"none",cursor:"pointer",minHeight:44}
+              },"← Previous")
+            )
+          )
+        ),
+
+        tab==="assess"&&React.createElement(Assess,{stageIdx:stageIdx,data:data,onAdvance:advanceStage})
+      ),
+
+      // Genie panel (desktop)
+      apiKey&&React.createElement(GeniePanel,{data:data,stageIdx:stageIdx,unlocked:unlocked,onSendMessage:sendGenieMessage,genieMessages:genieMessages,isLoading:isLoading,isMobile:false,showGenie:showGenie,onToggleGenie:()=>setShowGenie(!showGenie)})
+    ),
+
+    // Settings Modal
+    React.createElement(SettingsModal,{open:showSettings,onClose:()=>setShowSettings(false),onSave:saveSettings,initialKey:apiKey})
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// RENDER APP
+// ═══════════════════════════════════════════════════════════════════════════════
+
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+</script>
+</body>
+</html>

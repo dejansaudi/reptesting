@@ -1,0 +1,499 @@
+================================================================================
+MIT DESIGN X (DHSX) - QUICK REFERENCE GUIDE
+8-Stage Venture Building Methodology - One Page Summary
+================================================================================
+
+THE 8 STAGES AT A GLANCE:
+
+1. IDENTIFY              2. DISCOVER              3. DEFINE               4. ENGAGE
+   Timing &                Customer-Problem         Problem-Solution        Validation &
+   Positioning             Fit                      Fit                     Launch
+   ↓                       ↓                        ↓                       ↓
+   Find right timing       Validate real problem    Rapid prototype         MVP launch &
+   market entry            exists                   2-3 iterations          initial growth
+
+5. CREATE               6. DEVELOP               7. DEPLOY               8. SCALE
+   Product-Market          Growth                   Market                  Analytics &
+   Fit                     Optimization             Expansion               Maturity
+   ↓                       ↓                        ↓                       ↓
+   Deepen PMF &            Scale operations         Establish               Data-driven
+   optimize                profitably               market leadership       optimization
+
+================================================================================
+CRITICAL SUCCESS GATES BETWEEN STAGES
+================================================================================
+
+Stage 1→2: Real customer with high pain level (4-5) + willing to change behavior
+Stage 2→3: MVP delivers core value + customers willing to buy/use
+Stage 3→4: PMF validated (40%+ must-have) + Unit economics positive (LTV:CAC 3:1+)
+Stage 4→5: Multi-channel growth proven + Operational efficiency improving
+Stage 5→6: Repeatable growth at scale + Market leadership indicators
+Stage 6→7: Operations sustainable + Analytics infrastructure ready
+Stage 7→8: Predictive models deployed + Continuous optimization culture
+
+================================================================================
+ESSENTIAL METRICS BY PHASE
+================================================================================
+
+DISCOVERY PHASE:
+- Problem significance (pain level 4-5 on scale)
+- Customer willingness to change behavior
+- Repeatable customer acquisition possible
+
+VALIDATION PHASE (THE KEY GATES):
+- 40%+ saying product is "must-have" (PMF indicator)
+- LTV:CAC Ratio > 3:1 (unit economics positive)
+- CAC = Customer Acquisition Cost
+- LTV = Lifetime Value = MRR × Months Retained
+- Payback period < 12 months
+- Cohort retention 50%+ month-over-month
+
+GROWTH PHASE:
+- OMTM: One Metric That Matters identified
+- Multi-channel CAC comparison
+- Cohort LTV improvement trajectory
+- Operational leverage improving
+
+SCALE PHASE:
+- MRR (Monthly Recurring Revenue) growth rate
+- Market share leadership
+- Employee productivity (revenue per employee)
+- Profitability trajectory
+
+================================================================================
+CUSTOMER SEGMENTATION: THE PAIN-BARRIER MATRIX
+================================================================================
+
+PAIN LEVEL SCALE (Target 4-5):
+1. Has problem but isn't aware
+2. Is aware of having problem
+3. Been actively looking for solution
+4. Assembled solution from other parts ← SWEET SPOT
+5. Has/acquired a budget ← BEST TARGET
+
+BARRIER TO ENTRY SCALE:
+- Entry not possible (avoid)
+- Difficult to enter the segment
+- Normal entry but long sales cycles
+- Normal entry ← SWEET SPOT
+- Easy to enter the segment ← BEST TARGET
+
+STRATEGY: Find HIGH PAIN + LOW BARRIER combination (Blue Ocean)
+
+================================================================================
+THE 5-LEVEL VALUE PROPOSITION ARCHITECTURE
+================================================================================
+
+LEVEL 1: CORE VALUE PROPOSITION
+         ↓ (Fundamental reason for existence?)
+LEVEL 2: UNIQUE SELLING PROPOSITION
+         ↓ (Specific differentiation?)
+LEVEL 3: BENEFITS
+         ↓ (What does customer gain?)
+LEVEL 4: FEATURES
+         ↓ (Product characteristics?)
+LEVEL 5: PROBLEMS
+         (Pain points addressed?)
+
+================================================================================
+OMTM (ONE METRIC THAT MATTERS) PROCESS
+================================================================================
+
+Step 1: IDEATE - Generate candidate metrics
+Step 2: ANALYZE - Assess hard data + soft insights (copy others + go crazy)
+Step 3: RANK - Prioritize by impact/effort (P.I.E.S. or B.R.A.S.S.)
+Step 4: EXECUTE:
+   a) State hypothesis: (Specific Action) → (Expected Measurable Outcome)
+   b) Create minimum build plan
+   c) Design & test cycle
+   d) Time-box experiment (days, not months)
+Step 5: SYSTEMIZE - Embed winning approach into standard operations
+
+================================================================================
+BUSINESS MODEL CANVAS: THE 9 BLOCKS
+================================================================================
+
+KEY PARTNERS    KEY ACTIVITIES    KEY RESOURCES     VALUE PROPOSITIONS    CUSTOMER
+                                                                         SEGMENTS
+                                   ↓ CHANNELS ↓
+                                   ↓ RELATIONSHIPS ↓
+                                   ↓ REVENUE STREAMS ↓
+COST STRUCTURE  (Wrap: GET-KEEP-GROW customer strategy)
+
+KEY ELEMENTS:
+- VALUE PROPOSITIONS: V1-V6 benefits, problems solved
+- CUSTOMER SEGMENTS: Who are target customers?
+- CHANNELS: Sales, support, distribution, partnerships
+- CUSTOMER RELATIONSHIPS: Get (acquire), Keep (retain), Grow (expand)
+- REVENUE STREAMS: Subscription, one-time, freemium, etc.
+- KEY RESOURCES: Team, capital, technology, partners
+- KEY ACTIVITIES: What must company do?
+- KEY PARTNERS: Suppliers, channels, strategic partners
+- COST STRUCTURE: Fixed + variable costs, economies of scale
+
+================================================================================
+GET, KEEP, GROW CUSTOMER FRAMEWORK
+================================================================================
+
+GET CUSTOMERS (Acquisition):
+- Earned & Paid Media (ads, PR, content)
+- Referrals (word-of-mouth, affiliate)
+- Contests & Events
+- Blogs, RSS, Emails
+- Direct Sales
+
+KEEP CUSTOMERS (Retention):
+- Product Updates & Improvements
+- Outreach Programs
+- Loyalty Programs
+- Customer Service Excellence
+
+GROW CUSTOMERS (Expansion Revenue):
+- Viral Loops (invite friends)
+- Up-sell (better tier)
+- Cross-sell (related product)
+- Next-sell (new products)
+
+Formula: Customer LTV = (MRR × Months Retained) - (Total Get+Keep+Grow costs)
+
+================================================================================
+CUSTOMER JOURNEY MAP: THE 3 PHASES
+================================================================================
+
+PRE-BUY PHASE:
+- Awareness → Knowledge
+- Customer recognizes problem exists
+- Starts searching for solutions
+
+BUY PHASE:
+- Consideration → Selection → Purchase Decision
+- Customer evaluates options
+- Makes final buying decision
+
+OWN PHASE:
+- Satisfaction & Advocacy → Retention & Loyalty → End/Renewal
+- Customer uses product
+- Becomes repeat buyer or advocate
+
+Metrics at each phase: Customer experience (emotions), triggers, activities, pain points
+
+================================================================================
+MARKET STAGE ADOPTION CURVE (IMPORTANT!)
+================================================================================
+
+    2.5%        13.5%       34%         34%         16%
+  INNOVATORS  EARLY ADO   EARLY MAJ   LATE MAJ    LAGGARDS
+   (Risk      (Vision)   (Pragmat)   (Conserv)   (Skeptic)
+   Takers)
+
+STRATEGY: Target innovators (2.5%) first, then early adopters (13.5%)
+These are most likely to buy new solutions and give feedback.
+
+================================================================================
+PETER THIEL'S 7 SUCCESS FACTORS (Score 0-1, target 5.5+)
+================================================================================
+
+1. ENGINEERING - 10x better than alternative (hard but possible)
+2. TIMING - Right moment in market history (every moment happens once)
+3. MONOPOLY - Start small and dominate niche (network effects, switching costs)
+4. PEOPLE - Exceptional team (nobody can do it alone)
+5. DISTRIBUTION - Technology × Globalization (access to customers)
+6. DURABILITY - 10-20 year vision (sustainable competitive moat)
+7. SECRET - What do you know that competitors don't? (unfair advantage)
+
+Assessment: What will you add AI/advanced tech to? Who will lose jobs? Key trends?
+
+================================================================================
+THE HOOK MODEL: BUILDING HABIT LOOPS
+================================================================================
+
+    TRIGGER
+       ↓
+    ACTION → VARIABLE REWARD → INVESTMENT
+       ↑_______________________↑
+
+TRIGGER: External (alert, email) or habitual (routine, emotion, place, person)
+ACTION: Simplest behavior to get reward (low friction)
+REWARD: Unpredictability increases engagement (variable, not guaranteed)
+INVESTMENT: User invests time/data/reputation = switching cost + habit formation
+
+Example: "Every time the user [trigger], they use [product feature]"
+
+================================================================================
+ANALYTICS MATURITY PROGRESSION
+================================================================================
+
+STAGE 1: DESCRIPTIVE (What happened?)
+- Historical data analysis
+- Business Intelligence dashboards
+- Reports and metrics
+- Backward-looking
+
+    ↓
+
+STAGE 2: DIAGNOSTIC (Why did it happen?)
+- Root cause analysis
+- Pattern identification
+- Decision support systems
+- Statistical analysis
+
+    ↓
+
+STAGE 3: PREDICTIVE (What will happen?)
+- Forecasting and trends
+- Machine learning models
+- Scenario modeling
+- Decision support (AI-assisted)
+
+    ↓
+
+STAGE 4: PRESCRIPTIVE (What should I do?)
+- Optimization algorithms
+- Automated decisions
+- Real-time personalization
+- Decision automation (AGI-ready)
+
+================================================================================
+HYPOTHESIS-DRIVEN EXPERIMENT TEMPLATE
+================================================================================
+
+BACKGROUND: What are we trying to learn or achieve?
+
+FALSIFIABLE HYPOTHESIS:
+(Specific Repeatable Action) will (Expected Measurable Outcome)
+
+EXPERIMENT SCOPE:
+- Duration: ___ days/weeks
+- Sample size: ___
+- Minimum build plan (5 steps max)
+
+RESULTS:
+[Measured data here]
+
+VALIDATED LEARNING:
+[What we learned from results]
+
+OUTCOME: ☐ VALIDATED   ☐ INVALIDATED
+
+NEXT ACTION:
+[What experiment comes next?]
+
+================================================================================
+IMPORTANT vs. URGENT PRIORITIZATION MATRIX
+================================================================================
+
+              LOW URGENCY           HIGH URGENCY
+HIGH IMPORTANCE
+   SCHEDULE IT                         JUST DO IT
+   (Exercise, Planning)                (Crisis, bugs)
+
+LOW IMPORTANCE
+   DON'T DO IT                     DELEGATE/PUSH BACK
+   (Filing old docs)               (Others' deadlines)
+
+Strategy: Focus time on HIGH IMPORTANCE tasks, regardless of urgency
+
+================================================================================
+CUSTOMER DEVELOPMENT PHASES
+================================================================================
+
+PHASE 1: CUSTOMER DISCOVERY
+→ Get out and talk to 50+ potential customers
+→ Validate problem exists and is significant
+→ Iterate product concept based on feedback
+→ Search for business model
+
+    ↓
+
+PHASE 2: CUSTOMER VALIDATION
+→ Test business model repeatability
+→ Validate repeatable sales process
+→ Test whether customers will buy
+→ Pivot or proceed decision
+
+    ↓
+
+PHASE 3: CUSTOMER CREATION
+→ Scale sales and marketing
+→ Build market awareness
+→ Execute go-to-market strategy
+→ Create market demand
+
+    ↓
+
+PHASE 4: COMPANY BUILDING
+→ Transition from learning to operations
+→ Build management structure
+→ Create scalable processes
+→ Develop organizational culture
+
+================================================================================
+KEY TERMINOLOGY & DEFINITIONS
+================================================================================
+
+CAC = Customer Acquisition Cost (Total sales & marketing / New customers)
+LTV = Lifetime Value (MRR × Average months of retention)
+MRR = Monthly Recurring Revenue (total predictable monthly revenue)
+OMTM = One Metric That Matters (the single most important KPI right now)
+OKR = Objectives & Key Results (goal-setting framework)
+PMF = Product-Market Fit (product valued so customers actively want it)
+MVP = Minimum Viable Product (simplest solution delivering core value)
+TAM = Total Addressable Market (all potential customers)
+SAM = Serviceable Available Market (addressable portion we can reach)
+SOM = Serviceable Obtainable Market (realistic capture in near term)
+NPS = Net Promoter Score (customer willingness to recommend 0-100)
+Churn = Rate customers stop using product (monthly or annual)
+Retention = Rate customers keep using product (opposite of churn)
+Pivot = Fundamental change to business model based on learning
+Validated Learning = Knowledge gained from market experiment
+
+================================================================================
+QUICK DIAGNOSTIC: WHICH STAGE ARE YOU IN?
+================================================================================
+
+PRE-PMF (Stages 0-3):
+→ Still searching for right problem-solution
+→ Heavy experimentation and learning
+→ Customer conversations primary activity
+→ Unit economics not yet validated
+
+VALIDATING PMF (Stage 4):
+→ Have early traction (40%+ must-have)
+→ Testing at scale (LTV:CAC approaching 3:1)
+→ Refining product based on usage data
+→ Building repeatable sales process
+
+SCALING GROWTH (Stages 5-6):
+→ PMF clearly validated
+→ Multi-channel acquisition working
+→ Revenue growing 10%+ month-over-month
+→ Building organizational capability
+
+MARKET LEADER (Stage 7):
+→ Established competitive advantage
+→ Expanding into adjacent markets
+→ Analytics driving optimization
+→ Profitability improving
+
+MATURE/DATA-DRIVEN (Stage 8):
+→ Predictive analytics deployed
+→ Automated decision-making
+→ Competitive moat established
+→ Customer lifetime value maximized
+
+================================================================================
+FRAMEWORKS USED AT EACH STAGE
+================================================================================
+
+STAGE 0-1 TOOLS:
+- Market maps (problems, competition, segments)
+- Pain-barrier matrix
+- Personas & empathy maps
+- User journey maps
+- Strategy canvas
+- Value proposition canvas (customer side)
+- TAM/SAM/SOM definition
+- OKR & KPI hypothesis
+
+STAGE 2-3 TOOLS:
+- Prototypes (whiteboard, dummy, MVP)
+- Hook model (habit loop)
+- Storyboarding
+- Business model canvas
+- Financial cohort analysis
+- Get/Keep/Grow customer framework
+- Experiment plan/report
+
+STAGE 4-5 TOOLS:
+- Competitive analysis (Porter's 5 forces, side-by-side)
+- Channel optimization mapping
+- OMTM process
+- Growth hypothesis testing
+- Lean goals & milestones
+- HR hiring plans
+
+STAGE 6-7 TOOLS:
+- Market expansion strategy
+- Peter Thiel 7 factors assessment
+- Competitive radar chart
+- Analytics capability assessment
+- Hypothesis testing stages
+- Long-term vision framework
+
+STAGE 7-8 TOOLS:
+- Predictive models
+- Automated decision systems
+- KPI evolution tracking
+- Weekly review process
+- Culture & values alignment
+- Long-term vision execution
+
+================================================================================
+INTEGRATION WITH EXISTING FRAMEWORKS
+================================================================================
+
+When merging MIT DHSX with your startup school methodology:
+
+1. COMPARE STAGE GATES: Which validation gates match? Which are unique?
+2. MAP TOOLS: Which frameworks from DHSX fill gaps in your process?
+3. IDENTIFY METRICS: Do your KPIs align with DHSX metrics?
+4. PROCESS FLOW: Is the 8-stage progression compatible with your model?
+5. CUSTOMER VALIDATION: Does DHSX add rigor to validation phases?
+6. TEAM EVOLUTION: Does DHSX properly account for team scaling?
+7. TIMING: Does DHSX help with stage duration estimation?
+
+Key strength of DHSX: Clear validation gates + proven metrics at each stage
+Key strength to preserve: Your existing domain expertise and context
+
+================================================================================
+FOR MORE DETAILS
+================================================================================
+
+See the companion document:
+"MIT_DesignSX_Complete_Framework_Mapping.md"
+
+This quick reference includes:
+- All 8 stages with detailed frameworks
+- Assessment gates and success criteria
+- Integration notes for merging frameworks
+- Key terminology definitions
+- Cross-stage tools and templates
+
+================================================================================
+FILES IN THIS DIRECTORY
+================================================================================
+
+Design Process Overall/
+├── DK MIT DHSX.pdf
+│   └── Original Miro board export with visual layouts
+│
+├── MIT_DesignSX_Complete_Framework_Mapping.md
+│   └── Comprehensive reference (1,100+ lines)
+│       - Detailed framework descriptions
+│       - All tools and templates
+│       - Assessment gates
+│       - Integration guidance
+│
+└── MIT_DesignSX_Quick_Reference.txt
+    └── This file - summary format for quick lookup
+
+Plus organized folders by stage:
+0 STRATEGY MAP/
+1 TIMING AND POSITIONING HYPOTHESIS/
+2 CUSTOMER - PROBLEM - FIT/
+3 PROBLEM - SOLUTION - FIT/
+4 VALIDATION/
+5 PRODUCT - MARKET - FIT/
+6 MARKET/
+7 FROM PROJECT TO PROCESS/
+8 ANALYTICS/
+
+Each contains specific templates and examples for that stage.
+
+================================================================================
+
+Source: MIT Design X (DHSX) Framework
+Created by: Hekovnik
+Licensed: Creative Commons BY-SA 3.0
+
+Last Updated: February 2026
