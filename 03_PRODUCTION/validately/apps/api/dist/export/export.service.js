@@ -67,12 +67,15 @@ let ExportService = ExportService_1 = class ExportService {
             status: 'published',
         };
     }
-    async getJobStatus(jobId) {
+    async getJobStatus(jobId, userId) {
         const job = await this.prisma.exportJob.findUnique({
             where: { id: jobId },
         });
         if (!job) {
             throw new common_1.NotFoundException('Export job not found');
+        }
+        if (job.userId !== userId) {
+            throw new common_1.ForbiddenException('You do not have access to this export job');
         }
         return {
             jobId: job.id,
@@ -82,12 +85,15 @@ let ExportService = ExportService_1 = class ExportService {
             error: job.error,
         };
     }
-    async getJobDownload(jobId) {
+    async getJobDownload(jobId, userId) {
         const job = await this.prisma.exportJob.findUnique({
             where: { id: jobId },
         });
         if (!job) {
             throw new common_1.NotFoundException('Export job not found');
+        }
+        if (job.userId !== userId) {
+            throw new common_1.ForbiddenException('You do not have access to this export job');
         }
         if (job.status !== 'COMPLETED') {
             throw new common_1.NotFoundException('Export not ready yet');

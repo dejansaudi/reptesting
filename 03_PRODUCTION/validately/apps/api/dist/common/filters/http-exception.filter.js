@@ -31,8 +31,8 @@ let HttpExceptionFilter = class HttpExceptionFilter {
             }
         }
         else if (exception instanceof Error) {
-            message = exception.message;
-            error = exception.name;
+            message = 'Internal server error';
+            error = 'Internal Server Error';
             console.error('Unhandled exception:', {
                 name: exception.name,
                 message: exception.message,

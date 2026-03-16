@@ -68,6 +68,7 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(0),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], UpdateProjectDto.prototype, "version", void 0);
 class ProjectQueryDto {
@@ -89,6 +90,7 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Max)(100),
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Type)(() => Number),
     __metadata("design:type", Number)
@@ -96,11 +98,13 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsIn)(['updatedAt', 'createdAt', 'name']),
     __metadata("design:type", String)
 ], ProjectQueryDto.prototype, "sortBy", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsIn)(['asc', 'desc']),
     __metadata("design:type", String)
 ], ProjectQueryDto.prototype, "order", void 0);
 //# sourceMappingURL=projects.dto.js.map

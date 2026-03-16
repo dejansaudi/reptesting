@@ -125,12 +125,12 @@ function generatePitchDeckPdf(projectName, data) {
         const pageW = doc.page.width - 120;
         const irs = (0, shared_1.calcIRS)(data);
         for (let i = 0; i < SLIDES.length; i++) {
-            if (i > 0)
-                doc.addPage();
             const slide = SLIDES[i];
             const lines = slide.content(data).filter((l) => l.length > 0);
             if (lines.length === 0 && slide.title !== '')
                 continue;
+            if (i > 0)
+                doc.addPage();
             if (i === 0) {
                 doc.rect(0, 0, doc.page.width, doc.page.height).fillColor(BRAND).fill();
                 doc.fontSize(40).fillColor(WHITE).text(lines[0] || projectName, 60, 150, {

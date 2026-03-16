@@ -77,7 +77,8 @@ let UsersService = class UsersService {
         return this.decrypt(encryptedApiKey);
     }
     getEncryptionKey() {
-        return crypto.createHash('sha256').update(this.appConfig.jwtSecret).digest();
+        const secret = this.appConfig.encryptionSecret || this.appConfig.jwtSecret;
+        return crypto.createHash('sha256').update(secret).digest();
     }
     encrypt(text) {
         const key = this.getEncryptionKey();

@@ -36,7 +36,7 @@ let AiService = class AiService {
         const text = this.extractText(response);
         return {
             content: text,
-            usage: await this.rateLimiter.getUsage(user.id),
+            usage: await this.rateLimiter.getUsage(user.id, user.plan),
         };
     }
     async startResearch(user, query, projectId) {
@@ -54,7 +54,7 @@ let AiService = class AiService {
         return {
             result: text,
             status: 'completed',
-            usage: await this.rateLimiter.getUsage(user.id),
+            usage: await this.rateLimiter.getUsage(user.id, user.plan),
         };
     }
     async reviewField(user, fieldKey, fieldValue, projectData) {
@@ -72,7 +72,7 @@ let AiService = class AiService {
         return {
             fieldKey,
             feedback: text,
-            usage: await this.rateLimiter.getUsage(user.id),
+            usage: await this.rateLimiter.getUsage(user.id, user.plan),
         };
     }
     async getJobStatus(jobId) {
@@ -83,7 +83,7 @@ let AiService = class AiService {
         };
     }
     async getUsage(user) {
-        return this.rateLimiter.getUsage(user.id);
+        return this.rateLimiter.getUsage(user.id, user.plan);
     }
     async getClient(user) {
         if (user.encryptedApiKey) {

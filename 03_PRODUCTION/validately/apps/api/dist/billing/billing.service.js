@@ -63,7 +63,7 @@ let BillingService = class BillingService {
     async handleWebhook(rawBody, signature) {
         const webhookSecret = this.appConfig.stripeWebhookSecret;
         if (!webhookSecret) {
-            throw new common_1.InternalServerErrorException('Stripe webhook secret not configured');
+            throw new common_1.InternalServerErrorException('Webhook processing unavailable');
         }
         const event = this.stripeService.verifyWebhookSignature(rawBody, signature, webhookSecret);
         switch (event.type) {

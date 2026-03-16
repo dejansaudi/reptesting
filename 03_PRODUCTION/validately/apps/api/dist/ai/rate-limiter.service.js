@@ -41,28 +41,24 @@ let RateLimiterService = class RateLimiterService {
             return;
         }
         const key = this.getRateLimitKey(user.id);
-        const current = await this.redis.get(key);
-        const count = current ? parseInt(current, 10) : 0;
-        if (count >= limit) {
+        const now = new Date();
+        const midnight = new Date(now);
+        midnight.setUTCDate(midnight.getUTCDate() + 1);
+        midnight.setUTCHours(0, 0, 0, 0);
+        const ttlSeconds = Math.ceil((midnight.getTime() - now.getTime()) / 1000);
+        // Atomically initialize key with TTL if it doesn't exist
+        await this.redis.set(key, 0, 'EX', ttlSeconds, 'NX');
+        const count = await this.redis.incr(key);
+        if (count > limit) {
             throw new common_1.ForbiddenException(`Daily AI request limit reached (${limit}/${limit}). ` +
                 `Your ${user.plan} plan allows ${limit} requests per day. ` +
                 'Limits reset at midnight UTC.');
         }
-        const multi = this.redis.multi();
-        multi.incr(key);
-        if (count === 0) {
-            const now = new Date();
-            const midnight = new Date(now);
-            midnight.setUTCDate(midnight.getUTCDate() + 1);
-            midnight.setUTCHours(0, 0, 0, 0);
-            const ttlSeconds = Math.ceil((midnight.getTime() - now.getTime()) / 1000);
-            multi.expire(key, ttlSeconds);
-        }
-        await multi.exec();
     }
-    async getUsage(userId) {
+    async getUsage(userId, userPlan) {
+        const planLimit = PLAN_LIMITS[userPlan] ?? 0;
         if (!this.redis) {
-            return { used: 0, limit: 0, remaining: 0, resetsAt: new Date().toISOString() };
+            return { used: 0, limit: planLimit, remaining: planLimit, resetsAt: new Date().toISOString() };
         }
         const key = this.getRateLimitKey(userId);
         const current = await this.redis.get(key);
@@ -73,8 +69,8 @@ let RateLimiterService = class RateLimiterService {
         midnight.setUTCHours(0, 0, 0, 0);
         return {
             used,
-            limit: 0,
-            remaining: 0,
+            limit: planLimit,
+            remaining: Math.max(0, planLimit - used),
             resetsAt: midnight.toISOString(),
         };
     }

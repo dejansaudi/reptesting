@@ -48,7 +48,7 @@ export const VCHECKS = [
             const filled = scores.filter((v) => parseInt(v || '0') > 0);
             if (filled.length === 0)
                 return true; // not started yet — not a failure
-            const avg = filled.reduce((s, v) => s + (parseInt(v || '0') || 0), 0) / 7;
+            const avg = filled.reduce((s, v) => s + (parseInt(v || '0') || 0), 0) / filled.length;
             return avg >= 5;
         },
         msg: 'Thiel Scorecard average below 5/10 — weak moat. Which powers will you strengthen?',

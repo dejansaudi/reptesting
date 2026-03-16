@@ -14,11 +14,14 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PublicProjectsController = void 0;
 const common_1 = require("@nestjs/common");
-const db_1 = require("@validately/db");
 const shared_1 = require("@validately/shared");
+const prisma_service_1 = require("../common/prisma.service");
 let PublicProjectsController = class PublicProjectsController {
-    constructor() {
-        this.prisma = new db_1.PrismaClient();
+    constructor(prismaService) {
+        this.prismaService = prismaService;
+    }
+    get prisma() {
+        return this.prismaService.client;
     }
     async findBySlug(slug) {
         const project = await this.prisma.project.findFirst({
@@ -72,6 +75,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PublicProjectsController.prototype, "findBySlug", null);
 exports.PublicProjectsController = PublicProjectsController = __decorate([
-    (0, common_1.Controller)('public/projects')
+    (0, common_1.Controller)('public/projects'),
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], PublicProjectsController);
 //# sourceMappingURL=public-projects.controller.js.map

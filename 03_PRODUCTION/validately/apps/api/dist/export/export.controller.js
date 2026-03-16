@@ -31,11 +31,11 @@ let ExportController = class ExportController {
     async generatePublicPage(user, body) {
         return this.exportService.generatePublicPage(user, body.projectId, body.slug);
     }
-    async getJobStatus(jobId) {
-        return this.exportService.getJobStatus(jobId);
+    async getJobStatus(user, jobId) {
+        return this.exportService.getJobStatus(jobId, user.id);
     }
-    async downloadJob(jobId, res) {
-        const { buffer, filename } = await this.exportService.getJobDownload(jobId);
+    async downloadJob(user, jobId, res) {
+        const { buffer, filename } = await this.exportService.getJobDownload(jobId, user.id);
         res.set({
             'Content-Type': 'application/pdf',
             'Content-Disposition': `attachment; filename="${filename}"`,
@@ -76,17 +76,19 @@ __decorate([
 ], ExportController.prototype, "generatePublicPage", null);
 __decorate([
     (0, common_1.Get)('jobs/:id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], ExportController.prototype, "getJobStatus", null);
 __decorate([
     (0, common_1.Get)('jobs/:id/download'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Res)()),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], ExportController.prototype, "downloadJob", null);
 exports.ExportController = ExportController = __decorate([

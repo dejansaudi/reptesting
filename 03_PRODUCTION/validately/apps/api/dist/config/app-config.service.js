@@ -76,6 +76,9 @@ let AppConfigService = AppConfigService_1 = class AppConfigService {
     get sentryDsn() {
         return this.config.get('SENTRY_DSN');
     }
+    get encryptionSecret() {
+        return this.config.get('ENCRYPTION_SECRET');
+    }
     validateRequired() {
         const required = ['DATABASE_URL', 'JWT_SECRET'];
         const missing = required.filter((key) => !this.config.get(key));
