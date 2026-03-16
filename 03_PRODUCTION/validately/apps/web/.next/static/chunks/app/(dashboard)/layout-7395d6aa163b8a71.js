@@ -1,0 +1,1 @@
+(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[305],{3043:(e,s,n)=>{Promise.resolve().then(n.bind(n,3792))},3792:(e,s,n)=>{"use strict";n.d(s,{DashboardShell:()=>r});var t=n(3931);function r(e){let{children:s}=e;return(0,t.jsx)("div",{className:"flex h-screen bg-surface text-content font-sans",children:s})}}},e=>{e.O(0,[765,337,358],()=>e(e.s=3043)),_N_E=e.O()}]);
