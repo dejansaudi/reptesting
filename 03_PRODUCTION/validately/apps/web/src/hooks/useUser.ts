@@ -8,7 +8,7 @@ export function useUser() {
         id: data.user.id ?? "",
         email: data.user.email ?? "",
         name: data.user.name ?? "",
-        plan: (data as any).plan ?? "FREE",
+        plan: (data as any).plan ?? "free",
         hasApiKey: (data as any).hasApiKey ?? false,
         image: data.user.image ?? undefined,
       }
