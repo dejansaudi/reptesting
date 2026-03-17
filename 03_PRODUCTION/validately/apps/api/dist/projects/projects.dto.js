@@ -18,6 +18,7 @@ exports.CreateProjectDto = CreateProjectDto;
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.MaxLength)(200),
     __metadata("design:type", String)
 ], CreateProjectDto.prototype, "name", void 0);
 __decorate([
@@ -31,6 +32,7 @@ exports.UpdateProjectDto = UpdateProjectDto;
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.MaxLength)(200),
     __metadata("design:type", String)
 ], UpdateProjectDto.prototype, "name", void 0);
 __decorate([
@@ -41,6 +43,7 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Max)(6),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], UpdateProjectDto.prototype, "stageIdx", void 0);
@@ -52,6 +55,7 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Max)(100000),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], UpdateProjectDto.prototype, "xp", void 0);
@@ -63,6 +67,8 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.MaxLength)(100),
+    (0, class_validator_1.Matches)(/^[a-z0-9\-]+$/),
     __metadata("design:type", String)
 ], UpdateProjectDto.prototype, "publicSlug", void 0);
 __decorate([

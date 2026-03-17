@@ -18,7 +18,8 @@ export function checkGateCriterion(criterion, data) {
     }
     if (criterion.check.startsWith('maxValue:')) {
         const max = parseFloat(criterion.check.split(':')[1]) || Infinity;
-        return String(val).length > 0 && (parseFloat(String(val)) || 0) <= max;
+        const num = parseFloat(String(val));
+        return String(val).length > 0 && !isNaN(num) && num <= max;
     }
     return false;
 }

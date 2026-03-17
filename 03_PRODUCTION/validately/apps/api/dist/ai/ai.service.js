@@ -113,12 +113,21 @@ let AiService = class AiService {
         return block.text ?? '';
     }
     sanitizeInput(input) {
+        if (!input || typeof input !== 'string') {
+            throw new common_1.BadRequestException('Input is required and must be a string');
+        }
         let sanitized = input
             .replace(/```[\s\S]*?```/g, '')
             .replace(/system:/gi, '')
             .replace(/\[INST\]/gi, '')
             .replace(/<\|.*?\|>/g, '')
+            .replace(/<\/?s>/gi, '')
+            .replace(/\[SYSTEM\]/gi, '')
+            .replace(/Human:|Assistant:/gi, '')
             .trim();
+        if (sanitized.length === 0) {
+            throw new common_1.BadRequestException('Message cannot be empty');
+        }
         if (sanitized.length > 4000) {
             sanitized = sanitized.slice(0, 4000);
         }
