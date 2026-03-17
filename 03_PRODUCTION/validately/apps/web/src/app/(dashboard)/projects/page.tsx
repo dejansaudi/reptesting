@@ -3,12 +3,10 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useProjectStore } from "@/store/useProjectStore";
 import { apiFetch } from "@/lib/api";
-import { useUser } from "@/hooks/useUser";
 import { STAGE_META, calcIRS } from "@validately/shared";
 
 export default function ProjectsPage() {
   const router = useRouter();
-  const { user } = useUser();
   const setProject = useProjectStore((s) => s.setProject);
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -100,8 +98,8 @@ export default function ProjectsPage() {
       ) : (
         <div className="grid gap-4">
           {projects.map((project) => {
-            const irsScore =
-              project.irsScore ?? calcIRS(project.data || {}).score;
+            const irs = calcIRS(project.data || {});
+            const irsScore = project.irsScore ?? irs.score;
             const stage = STAGE_META[project.stageIdx ?? 0];
             const updated = new Date(project.updatedAt).toLocaleDateString();
 
@@ -134,7 +132,7 @@ export default function ProjectsPage() {
                       >
                         {stage?.icon} {stage?.phase}
                       </span>
-                      <span>IRS: {irsScore}/820</span>
+                      <span>IRS: {irsScore}/{irs.maxScore}</span>
                       <span>Updated {updated}</span>
                     </div>
                   </div>

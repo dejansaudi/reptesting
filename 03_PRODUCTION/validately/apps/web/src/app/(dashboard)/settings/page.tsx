@@ -87,8 +87,8 @@ export default function SettingsPage() {
     );
   }
 
-  const plan = user?.plan || "FREE";
-  const isPaid = plan === "PRO" || plan === "TEAM";
+  const plan = user?.plan || "free";
+  const isPaid = plan === "pro" || plan === "team";
 
   return (
     <div className="max-w-2xl mx-auto p-8">
@@ -166,7 +166,7 @@ export default function SettingsPage() {
         <h2 className="text-sm font-bold mb-2">Current Plan</h2>
         <p className="text-xs text-content-subtle mb-4">
           You are on the{" "}
-          <span className="font-bold text-brand">{plan}</span> plan.
+          <span className="font-bold text-brand">{plan.toUpperCase()}</span> plan.
         </p>
         {isPaid ? (
           <button

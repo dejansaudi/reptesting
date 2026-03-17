@@ -42,8 +42,8 @@ export function DiscoverStage({ data, update }: StageProps) {
         <FieldInput label="What do they think/feel?" type="textarea" value={get("think_feel")}
           onChange={(v) => update("think_feel", v)} placeholder="What occupies their thinking? What worries them?"
           onAskAI={askAI} />
-        <FieldInput label="Current workarounds" type="textarea" value={get("workarounds")}
-          onChange={(v) => update("workarounds", v)} placeholder="How do they solve this problem today?" onAskAI={askAI} />
+        <FieldInput label="Current workarounds" type="textarea" value={get("current_workarounds")}
+          onChange={(v) => update("current_workarounds", v)} placeholder="How do they solve this problem today?" onAskAI={askAI} />
         <FieldInput label="Customer journey map" type="textarea" value={get("journey_map")}
           onChange={(v) => update("journey_map", v)} placeholder="Step 1: → Step 2: → Step 3: → Pain point:" onAskAI={askAI} />
       </div>
@@ -59,21 +59,21 @@ export function DiscoverStage({ data, update }: StageProps) {
       <div className="p-3 bg-surface-2 rounded-lg border border-border mb-4">
         <div className="text-[11px] font-bold text-content mb-2.5">Empathy Map</div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <FieldInput label="Think & Feel" type="textarea" value={get("empathy_think")}
-            onChange={(v) => update("empathy_think", v)} placeholder="What occupies their thinking?" />
+          <FieldInput label="Think & Feel" type="textarea" value={get("empathy_think_feel")}
+            onChange={(v) => update("empathy_think_feel", v)} placeholder="What occupies their thinking?" />
           <FieldInput label="See" type="textarea" value={get("empathy_see")}
             onChange={(v) => update("empathy_see", v)} placeholder="What do they see in their environment?" />
           <FieldInput label="Hear" type="textarea" value={get("empathy_hear")}
             onChange={(v) => update("empathy_hear", v)} placeholder="What do friends/colleagues say?" />
-          <FieldInput label="Say & Do" type="textarea" value={get("empathy_say")}
-            onChange={(v) => update("empathy_say", v)} placeholder="What do they say publicly? How do they behave?" />
+          <FieldInput label="Say & Do" type="textarea" value={get("empathy_say_do")}
+            onChange={(v) => update("empathy_say_do", v)} placeholder="What do they say publicly? How do they behave?" />
         </div>
       </div>
 
       <div className="p-3 bg-surface-2 rounded-lg border border-border mb-4">
         <div className="text-[11px] font-bold text-content mb-2.5">Value Proposition Canvas</div>
-        <FieldInput label="Jobs to Be Done" type="textarea" value={get("jtbd")}
-          onChange={(v) => update("jtbd", v)} placeholder="What job is the customer hiring your product to do?" onAskAI={askAI} />
+        <FieldInput label="Jobs to Be Done" type="textarea" value={get("customer_jobs")}
+          onChange={(v) => update("customer_jobs", v)} placeholder="What job is the customer hiring your product to do?" onAskAI={askAI} />
         <FieldInput label="Customer Gains" type="textarea" value={get("customer_gains")}
           onChange={(v) => update("customer_gains", v)} placeholder="What outcomes do customers want?" />
       </div>

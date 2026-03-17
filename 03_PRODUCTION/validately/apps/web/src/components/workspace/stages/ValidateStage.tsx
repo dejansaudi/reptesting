@@ -44,8 +44,8 @@ export function ValidateStage({ data, update }: StageProps) {
         <FieldInput label="LTV:CAC Ratio" type="number" value={get("ltv_cac_ratio")}
           onChange={(v) => update("ltv_cac_ratio", v)} placeholder="e.g., 3.5" gate />
         <BenchmarkIndicator label="LTV:CAC" value={get("ltv_cac_ratio")} good="3" ok="2" bad="1" />
-        <FieldInput label="Payback Period (months)" type="number" value={get("payback_months")}
-          onChange={(v) => update("payback_months", v)} placeholder="e.g., 12" />
+        <FieldInput label="Payback Period (months)" type="number" value={get("payback")}
+          onChange={(v) => update("payback", v)} placeholder="e.g., 12" />
       </div>
 
       <div className="p-3 bg-surface-2 rounded-lg border border-border mb-4">
@@ -67,23 +67,23 @@ export function ValidateStage({ data, update }: StageProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <FieldInput label="BMC Channels" type="textarea" value={get("bmc_channels")}
             onChange={(v) => update("bmc_channels", v)} placeholder="How do you reach customers?" gate />
-          <FieldInput label="BMC Customer Relationships" type="textarea" value={get("bmc_relationships")}
-            onChange={(v) => update("bmc_relationships", v)} placeholder="How do you interact with customers?" />
-          <FieldInput label="BMC Key Resources" type="textarea" value={get("bmc_resources")}
-            onChange={(v) => update("bmc_resources", v)} placeholder="What assets are required?" />
-          <FieldInput label="BMC Key Activities" type="textarea" value={get("bmc_activities")}
-            onChange={(v) => update("bmc_activities", v)} placeholder="What must you do well?" />
-          <FieldInput label="BMC Key Partners" type="textarea" value={get("bmc_partners")}
-            onChange={(v) => update("bmc_partners", v)} placeholder="Who helps you deliver?" />
-          <FieldInput label="BMC Cost Structure" type="textarea" value={get("bmc_costs")}
-            onChange={(v) => update("bmc_costs", v)} placeholder="What are the major costs?" gate />
+          <FieldInput label="BMC Customer Relationships" type="textarea" value={get("bmc_customer_relationships")}
+            onChange={(v) => update("bmc_customer_relationships", v)} placeholder="How do you interact with customers?" />
+          <FieldInput label="BMC Key Resources" type="textarea" value={get("bmc_key_resources")}
+            onChange={(v) => update("bmc_key_resources", v)} placeholder="What assets are required?" />
+          <FieldInput label="BMC Key Activities" type="textarea" value={get("bmc_key_activities")}
+            onChange={(v) => update("bmc_key_activities", v)} placeholder="What must you do well?" />
+          <FieldInput label="BMC Key Partners" type="textarea" value={get("bmc_key_partners")}
+            onChange={(v) => update("bmc_key_partners", v)} placeholder="Who helps you deliver?" />
+          <FieldInput label="BMC Cost Structure" type="textarea" value={get("bmc_cost_structure")}
+            onChange={(v) => update("bmc_cost_structure", v)} placeholder="What are the major costs?" gate />
         </div>
       </div>
 
       <div className="p-3 bg-surface-2 rounded-lg border border-border mb-4">
         <div className="text-[11px] font-bold text-content mb-2.5">Experiment Framework</div>
-        <FieldInput label="Hypothesis" type="textarea" value={get("hypothesis")}
-          onChange={(v) => update("hypothesis", v)}
+        <FieldInput label="Hypothesis" type="textarea" value={get("experiment_hypothesis")}
+          onChange={(v) => update("experiment_hypothesis", v)}
           placeholder="We believe [action] will result in [outcome]. We'll know when [metric] changes by [amount]." gate onAskAI={askAI} />
         <FieldInput label="Experiment Result" type="textarea" value={get("experiment_result")}
           onChange={(v) => update("experiment_result", v)} placeholder="What happened?" onAskAI={askAI} />

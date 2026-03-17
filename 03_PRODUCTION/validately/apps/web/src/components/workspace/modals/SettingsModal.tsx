@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useId } from "react";
 import { apiFetch } from "@/lib/api";
 import { useUser } from "@/hooks/useUser";
 import { Modal } from "../Modal";
@@ -10,6 +10,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const apiKeyId = useId();
 
   async function saveKey() {
     setSaving(true);
@@ -31,9 +32,9 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
         </div>
         {error && <div className="bg-danger/10 border border-danger/30 text-danger text-xs p-2.5 rounded-lg mb-4">{error}</div>}
         <div className="mb-5">
-          <label className="text-[11px] font-bold text-content block mb-1.5">Anthropic API Key</label>
+          <label htmlFor={apiKeyId} className="text-[11px] font-bold text-content block mb-1.5">Anthropic API Key</label>
           <p className="text-[10px] text-content-subtle mb-2">Required for AI coaching. Your key is encrypted at rest.</p>
-          <input type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)}
+          <input id={apiKeyId} type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)}
             placeholder="sk-ant-..." className="w-full py-2.5 px-4 rounded-lg bg-surface text-content border border-border text-sm mb-2 focus:border-brand focus:outline-none" />
           <button onClick={saveKey} disabled={saving}
             className="px-5 py-2 rounded-lg bg-brand text-white text-sm font-bold hover:bg-brand-hover disabled:opacity-50">

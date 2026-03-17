@@ -80,8 +80,8 @@ export function DefineStage({ data, update }: StageProps) {
             { value: "prototype", label: "Prototype \u2014 Functional simulation" },
             { value: "mvp", label: "MVP \u2014 Minimum viable product" },
           ]} />
-        <FieldInput label="Test Plan" type="textarea" value={get("test_plan")}
-          onChange={(v) => update("test_plan", v)}
+        <FieldInput label="Test Plan" type="textarea" value={get("prototype_test_plan")}
+          onChange={(v) => update("prototype_test_plan", v)}
           placeholder="How will you test this with real users? What are you measuring?" onAskAI={askAI} />
       </div>
     </div>

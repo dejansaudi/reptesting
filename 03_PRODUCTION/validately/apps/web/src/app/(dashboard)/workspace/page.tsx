@@ -7,6 +7,7 @@ import { apiFetch } from "@/lib/api";
 import { useAutosave } from "@/hooks/useAutosave";
 
 // Workspace components
+import { useUser } from "@/hooks/useUser";
 import { StageNav } from "@/components/workspace/StageNav";
 import { SaveStatus } from "@/components/workspace/SaveStatus";
 import { ErrorBoundary } from "@/components/workspace/ErrorBoundary";
@@ -127,6 +128,7 @@ export default function WorkspacePage() {
   const [showToolsDropdown, setShowToolsDropdown] = useState(false);
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const router = useRouter();
+  const { user } = useUser();
 
   // FIX P0: Real autosave with actual status reporting
   const saveStatus = useAutosave(data, projectId, !!projectId);
@@ -310,7 +312,7 @@ export default function WorkspacePage() {
       )}
       {activeModal === "pricing" && (
         <PricingModal
-          currentPlan="FREE"
+          currentPlan={user?.plan || "free"}
           onClose={() => setActiveModal(null)}
         />
       )}

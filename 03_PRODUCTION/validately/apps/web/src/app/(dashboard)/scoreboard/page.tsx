@@ -1,7 +1,6 @@
 "use client";
 import { useProjectStore } from "@/store/useProjectStore";
-import { apiFetch } from "@/lib/api";
-import { calcIRS, STAGE_META, VCHECKS, runXV } from "@validately/shared";
+import { calcIRS, STAGE_META, runXV } from "@validately/shared";
 import { useRouter } from "next/navigation";
 
 function ScoreRing({ pct, size = 120 }: { pct: number; size?: number }) {

@@ -159,8 +159,8 @@ export function DiagnoseStage({ data, update }: StageProps) {
         />
         <FieldSelect
           label="Target Adopter Segment"
-          value={get("adopter_segment")}
-          onChange={(v) => update("adopter_segment", v)}
+          value={get("target_adopter")}
+          onChange={(v) => update("target_adopter", v)}
           options={["Innovators", "Early Adopters", "Early Majority", "Late Majority"]}
         />
       </div>
@@ -173,15 +173,15 @@ export function DiagnoseStage({ data, update }: StageProps) {
         <FieldInput
           label="ELIMINATE"
           type="textarea"
-          value={get("canvas_eliminate")}
-          onChange={(v) => update("canvas_eliminate", v)}
+          value={get("strategy_eliminate")}
+          onChange={(v) => update("strategy_eliminate", v)}
           placeholder="What does the industry take for granted that you can eliminate?"
         />
         <FieldInput
           label="CREATE"
           type="textarea"
-          value={get("canvas_create")}
-          onChange={(v) => update("canvas_create", v)}
+          value={get("strategy_create")}
+          onChange={(v) => update("strategy_create", v)}
           placeholder="What can you create that the industry has never offered?"
         />
       </div>

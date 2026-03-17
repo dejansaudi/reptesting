@@ -105,55 +105,62 @@ export function AICoach({ show, onToggle }: AICoachProps) {
     // Auto-send after a small delay for better UX
     setTimeout(() => {
       const userMsg: Message = { role: "user", content: prompt };
-      // Use functional updater to avoid stale closure over `messages`
+      // Use functional updater to get fresh messages, then fire API call outside
+      let snapshot: Message[] = [];
       setMessages((prev) => {
-        const updated = [...prev, userMsg];
-        apiFetch("/ai/chat", {
-          method: "POST",
-          body: JSON.stringify({
-            messages: updated.map((m) => ({
-              role: m.role,
-              content: m.content,
-            })),
-            systemPrompt: AI_SYS,
-            context: {
-              stage: stageIdx,
-              startupName: data.startup_name || "Unnamed",
-            },
-          }),
-        })
-          .then(async (res) => {
-            if (!res.ok) throw new Error();
-            const json = await res.json();
-            setMessages((m) => [
-              ...m,
-              { role: "assistant", content: json.content },
-            ]);
-          })
-          .catch(() => {
-            setMessages((m) => [
-              ...m,
-              {
-                role: "assistant",
-                content: "Connection issue. Check your API key in Settings.",
-              },
-            ]);
-          })
-          .finally(() => setLoading(false));
-        return updated;
+        snapshot = [...prev, userMsg];
+        return snapshot;
       });
       setInput("");
       setLoading(true);
+
+      apiFetch("/ai/chat", {
+        method: "POST",
+        body: JSON.stringify({
+          messages: snapshot.map((m) => ({
+            role: m.role,
+            content: m.content,
+          })),
+          systemPrompt: AI_SYS,
+          context: {
+            stage: stageIdx,
+            startupName: data.startup_name || "Unnamed",
+          },
+        }),
+      })
+        .then(async (res) => {
+          if (!res.ok) throw new Error();
+          const json = await res.json();
+          setMessages((m) => [
+            ...m,
+            { role: "assistant", content: json.content },
+          ]);
+        })
+        .catch(() => {
+          setMessages((m) => [
+            ...m,
+            {
+              role: "assistant",
+              content: "Connection issue. Check your API key in Settings.",
+            },
+          ]);
+        })
+        .finally(() => setLoading(false));
     }, 100);
   }
 
   // Expose askAboutField via a ref-like pattern on the window for cross-component access
+  const askAboutFieldRef = useRef(askAboutField);
+  askAboutFieldRef.current = askAboutField;
+
   useEffect(() => {
-    (window as any).__aiCoachAskField = askAboutField;
+    const handler = (...args: Parameters<typeof askAboutField>) =>
+      askAboutFieldRef.current(...args);
+    (window as any).__aiCoachAskField = handler;
     return () => {
       delete (window as any).__aiCoachAskField;
     };
-  });
+  }, []);
 
   return (
     <>
