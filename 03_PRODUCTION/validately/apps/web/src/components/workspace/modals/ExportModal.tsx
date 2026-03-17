@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { apiFetch } from "@/lib/api";
 import { useProjectStore } from "@/store/useProjectStore";
 import { Modal } from "../Modal";
@@ -10,6 +10,11 @@ export function ExportModal({ onClose }: { onClose: () => void }) {
   const projectId = useProjectStore((s) => s.projectId);
   const [statuses, setStatuses] = useState<Record<string, ExportStatus>>({ pdf: "idle", "pitch-deck": "idle" });
   const [error, setError] = useState<string | null>(null);
+  const cancelledRef = useRef(false);
+
+  useEffect(() => {
+    return () => { cancelledRef.current = true; };
+  }, []);
 
   const startExport = useCallback(async (type: string) => {
     if (!projectId) return;
@@ -21,19 +26,23 @@ export function ExportModal({ onClose }: { onClose: () => void }) {
       });
       if (!res.ok) throw new Error();
       const { jobId } = await res.json();
-      // Poll for completion
+      // Poll for completion (with unmount guard)
       for (let i = 0; i < 30; i++) {
         await new Promise((r) => setTimeout(r, 1000));
+        if (cancelledRef.current) return;
         const poll = await apiFetch(`/export/jobs/${jobId}`);
         if (!poll.ok) continue;
         const job = await poll.json();
+        if (cancelledRef.current) return;
         if (job.status === "completed") { setStatuses((s) => ({ ...s, [type]: "completed" })); return; }
         if (job.status === "failed") { setError(job.error || "Export failed"); setStatuses((s) => ({ ...s, [type]: "failed" })); return; }
         setStatuses((s) => ({ ...s, [type]: job.status }));
       }
-      setError("Export timed out");
-      setStatuses((s) => ({ ...s, [type]: "failed" }));
-    } catch { setError(`Failed to generate ${type === "pdf" ? "PDF" : "pitch deck"}`); setStatuses((s) => ({ ...s, [type]: "failed" })); }
+      if (!cancelledRef.current) {
+        setError("Export timed out");
+        setStatuses((s) => ({ ...s, [type]: "failed" }));
+      }
+    } catch { if (!cancelledRef.current) { setError(`Failed to generate ${type === "pdf" ? "PDF" : "pitch deck"}`); setStatuses((s) => ({ ...s, [type]: "failed" })); } }
   }, [projectId]);
 
   const exports = [

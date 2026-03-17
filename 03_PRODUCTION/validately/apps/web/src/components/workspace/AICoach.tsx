@@ -105,42 +105,45 @@ export function AICoach({ show, onToggle }: AICoachProps) {
     // Auto-send after a small delay for better UX
     setTimeout(() => {
       const userMsg: Message = { role: "user", content: prompt };
-      setMessages((m) => [...m, userMsg]);
+      // Use functional updater to avoid stale closure over `messages`
+      setMessages((prev) => {
+        const updated = [...prev, userMsg];
+        apiFetch("/ai/chat", {
+          method: "POST",
+          body: JSON.stringify({
+            messages: updated.map((m) => ({
+              role: m.role,
+              content: m.content,
+            })),
+            systemPrompt: AI_SYS,
+            context: {
+              stage: stageIdx,
+              startupName: data.startup_name || "Unnamed",
+            },
+          }),
+        })
+          .then(async (res) => {
+            if (!res.ok) throw new Error();
+            const json = await res.json();
+            setMessages((m) => [
+              ...m,
+              { role: "assistant", content: json.content },
+            ]);
+          })
+          .catch(() => {
+            setMessages((m) => [
+              ...m,
+              {
+                role: "assistant",
+                content: "Connection issue. Check your API key in Settings.",
+              },
+            ]);
+          })
+          .finally(() => setLoading(false));
+        return updated;
+      });
       setInput("");
       setLoading(true);
-
-      apiFetch("/ai/chat", {
-        method: "POST",
-        body: JSON.stringify({
-          messages: [...messages, userMsg].map((m) => ({
-            role: m.role,
-            content: m.content,
-          })),
-          systemPrompt: AI_SYS,
-          context: {
-            stage: stageIdx,
-            startupName: data.startup_name || "Unnamed",
-          },
-        }),
-      })
-        .then(async (res) => {
-          if (!res.ok) throw new Error();
-          const json = await res.json();
-          setMessages((m) => [
-            ...m,
-            { role: "assistant", content: json.content },
-          ]);
-        })
-        .catch(() => {
-          setMessages((m) => [
-            ...m,
-            {
-              role: "assistant",
-              content: "Connection issue. Check your API key in Settings.",
-            },
-          ]);
-        })
-        .finally(() => setLoading(false));
     }, 100);
   }
 

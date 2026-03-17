@@ -41,7 +41,7 @@ export function PricingModal({ currentPlan, onClose }: { currentPlan: string; on
                 </div>
                 <button onClick={() => checkout(tier.id)} disabled={isCurrent || isFree}
                   className={`w-full py-2.5 rounded-lg text-sm font-bold ${isCurrent || isFree ? "bg-surface-3 text-content-subtle cursor-default" : "bg-brand text-white hover:bg-brand-hover"}`}>
-                  {isCurrent ? "Current Plan" : isFree ? "Free" : (tier as any).cta || "Select Plan"}
+                  {isCurrent ? "Current Plan" : isFree ? "Free" : tier.cta || "Select Plan"}
                 </button>
               </div>
             );

@@ -19,6 +19,7 @@ export default function LoginPage() {
 
         {error && (
           <div
+            id="login-error"
             className="mb-4 p-3 rounded-lg bg-danger/10 border border-danger/20 text-danger text-xs text-center"
             role="alert"
           >
