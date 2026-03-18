@@ -23,7 +23,9 @@ export function SnapshotsModal({ onClose }: { onClose: () => void }) {
     try {
       const res = await apiFetch(`/projects/${projectId}/snapshots`);
       if (res.ok) setSnapshots(await res.json());
-    } catch {}
+    } catch {
+      console.error("Failed to load snapshots");
+    }
   }, [projectId]);
 
   useEffect(() => {
@@ -44,6 +46,7 @@ export function SnapshotsModal({ onClose }: { onClose: () => void }) {
         await loadSnapshots();
       }
     } catch {
+      alert("Failed to save snapshot.");
     } finally {
       setSaving(false);
     }

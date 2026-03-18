@@ -12,8 +12,10 @@ export function PricingModal({ currentPlan, onClose }: { currentPlan: string; on
       const res = await apiFetch("/billing/checkout", { method: "POST", body: JSON.stringify({ plan: planId }) });
       if (!res.ok) throw new Error();
       const { url } = await res.json();
-      window.location.href = url;
-    } catch {}
+      if (url) window.location.href = url;
+    } catch {
+      alert("Checkout failed. Please try again.");
+    }
   }
 
   return (

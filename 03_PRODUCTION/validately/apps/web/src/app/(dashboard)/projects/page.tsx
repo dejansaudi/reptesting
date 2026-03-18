@@ -50,7 +50,9 @@ export default function ProjectsPage() {
       const res = await apiFetch(`/projects/${id}`, { method: "DELETE" });
       if (!res.ok) return;
       setProjects((p) => p.filter((proj) => proj.id !== id));
-    } catch {}
+    } catch {
+      alert("Failed to delete project. Please try again.");
+    }
   }
 
   useEffect(() => {

@@ -186,11 +186,11 @@ export function FieldInput({
       {showCharCounter && (
         <div
           className={`text-[10px] mt-1 text-right ${
-            charCount >= minLength! ? "text-success" : "text-content-subtle"
+            charCount >= (minLength ?? 0) ? "text-success" : "text-content-subtle"
           }`}
         >
           {charCount}/{minLength} chars
-          {charCount >= minLength! && " \u2713"}
+          {charCount >= (minLength ?? 0) && " \u2713"}
         </div>
       )}
 
