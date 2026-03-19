@@ -21,7 +21,7 @@ export function BenchmarkIndicator({
 }: BenchmarkIndicatorProps) {
   let indicator = "\u26AA"; // white circle
   let indicatorLabel = "No data";
-  if (value !== "") {
+  if (value !== "" && !isNaN(parseFloat(value))) {
     const num = parseFloat(value);
     if (lowerIsBetter) {
       if (good && num <= parseFloat(good)) {

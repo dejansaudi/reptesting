@@ -22,7 +22,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
     setError(null);
     try {
       const res = await apiFetch("/users/me/api-key", { method: "PUT", body: JSON.stringify({ apiKey }) });
-      if (res.ok) { setSaved(true); setTimeout(() => setSaved(false), 2000); }
+      if (res.ok) { setSaved(true); setApiKey("sk-ant-\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022"); setTimeout(() => setSaved(false), 2000); }
       else setError("Failed to save API key.");
     } catch { setError("Failed to save API key. Please try again."); }
     finally { setSaving(false); }
@@ -39,7 +39,9 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
         <div className="mb-5">
           <label htmlFor={apiKeyId} className="text-[11px] font-bold text-content block mb-1.5">Anthropic API Key</label>
           <p className="text-[10px] text-content-subtle mb-2">Required for AI coaching. Your key is encrypted at rest.</p>
-          <input id={apiKeyId} type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)}
+          <input id={apiKeyId} type="password" value={apiKey}
+            onFocus={() => { if (apiKey.startsWith("sk-ant-\u2022")) setApiKey(""); }}
+            onChange={(e) => setApiKey(e.target.value)}
             placeholder="sk-ant-..." className="w-full py-2.5 px-4 rounded-lg bg-surface text-content border border-border text-sm mb-2 focus:border-brand focus:outline-none" />
           <button onClick={saveKey} disabled={saving || !apiKey.trim() || apiKey.startsWith("sk-ant-\u2022")}
             className="px-5 py-2 rounded-lg bg-brand text-white text-sm font-bold hover:bg-brand-hover disabled:opacity-50">

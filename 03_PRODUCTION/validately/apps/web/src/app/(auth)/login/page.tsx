@@ -43,10 +43,15 @@ export default function LoginPage() {
         )}
 
         <button
-          onClick={() => {
+          onClick={async () => {
             setIsLoading(true);
             setError("");
-            signIn("google", { callbackUrl: "/workspace" });
+            try {
+              await signIn("google", { callbackUrl: "/workspace" });
+            } catch {
+              setError("Failed to start Google sign in. Please try again.");
+              setIsLoading(false);
+            }
           }}
           disabled={isLoading}
           className="w-full py-3 px-4 rounded-lg bg-surface-2 border border-border text-sm font-semibold text-content hover:bg-surface-3 mb-3 disabled:opacity-50 transition-colors"

@@ -28,7 +28,9 @@ export function ShareModal({ onClose }: { onClose: () => void }) {
           <input type="text" readOnly value={url || "Generating link..."} className="flex-1 py-2.5 px-4 rounded-lg bg-surface text-content border border-border text-sm" />
           <button onClick={() => {
             if (!url) return;
-            navigator.clipboard.writeText(url).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+            navigator.clipboard.writeText(url)
+              .then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); })
+              .catch(() => { /* Fallback: select text for manual copy */ const input = document.querySelector<HTMLInputElement>('input[readonly]'); input?.select(); });
           }} disabled={!url} className="px-4 py-2.5 rounded-lg bg-brand text-white text-sm font-bold hover:bg-brand-hover disabled:opacity-50">
             {copied ? "Copied!" : "Copy"}
           </button>

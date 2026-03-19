@@ -41,8 +41,8 @@ export default function OnboardingPage() {
   async function completeOnboarding() {
     setLoading(true);
     try {
-      // FIX P1: Send stage and goal data to the API (was discarded before)
-      await apiFetch("/users/me", {
+      // Save onboarding preferences (non-blocking — proceed even if this fails)
+      const profileRes = await apiFetch("/users/me", {
         method: "PATCH",
         body: JSON.stringify({
           onboardingComplete: true,
@@ -50,6 +50,9 @@ export default function OnboardingPage() {
           primaryGoal: answers.goal,
         }),
       });
+      if (!profileRes.ok) {
+        console.warn("Failed to save onboarding preferences, continuing with project creation");
+      }
       const res = await apiFetch("/projects", {
         method: "POST",
         body: JSON.stringify({

@@ -136,7 +136,6 @@ export default function WorkspacePage() {
   // FIX P0: Real autosave with actual status reporting
   const saveStatus = useAutosave(data, projectId, !!projectId, version, setVersion);
 
-
   // Warn user before leaving with unsaved changes
   const handleBeforeUnload = useCallback(
     (e: BeforeUnloadEvent) => {

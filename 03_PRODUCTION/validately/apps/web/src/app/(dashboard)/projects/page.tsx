@@ -24,6 +24,7 @@ export default function ProjectsPage() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const [loadError, setLoadError] = useState(false);
 
@@ -81,12 +82,16 @@ export default function ProjectsPage() {
 
   async function deleteProject(id: string) {
     if (!confirm("Delete this project? This cannot be undone.")) return;
+    setDeleteError(null);
     try {
       const res = await apiFetch(`/projects/${id}`, { method: "DELETE" });
-      if (!res.ok) return;
+      if (!res.ok) {
+        setDeleteError("Failed to delete project. Please try again.");
+        return;
+      }
       setProjects((p) => p.filter((proj) => proj.id !== id));
     } catch {
-      alert("Failed to delete project. Please try again.");
+      setDeleteError("Failed to delete project. Please check your connection.");
     }
   }
 
@@ -129,6 +134,14 @@ export default function ProjectsPage() {
         <div className="bg-danger/10 border border-danger/30 text-danger text-sm p-4 rounded-lg mb-4">
           {createError}
           <button onClick={() => setCreateError(null)}
+            className="ml-2 underline font-bold">Dismiss</button>
+        </div>
+      )}
+
+      {deleteError && (
+        <div className="bg-danger/10 border border-danger/30 text-danger text-sm p-4 rounded-lg mb-4">
+          {deleteError}
+          <button onClick={() => setDeleteError(null)}
             className="ml-2 underline font-bold">Dismiss</button>
         </div>
       )}
