@@ -41,12 +41,15 @@ export function BenchmarkIndicator({
       if (bad && num < parseFloat(bad)) {
         indicator = "\u{1F534}";
         indicatorLabel = "Below target";
-      } else if (ok && num < parseFloat(ok)) {
-        indicator = "\u{1F7E1}";
-        indicatorLabel = "OK";
       } else if (good && num >= parseFloat(good)) {
         indicator = "\u{1F7E2}";
         indicatorLabel = "Good";
+      } else if (ok && num >= parseFloat(ok)) {
+        indicator = "\u{1F7E1}";
+        indicatorLabel = "OK";
+      } else if (bad) {
+        indicator = "\u{1F7E1}";
+        indicatorLabel = "OK";
       }
     }
   }

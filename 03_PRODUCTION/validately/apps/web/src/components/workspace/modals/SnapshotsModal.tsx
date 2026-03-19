@@ -12,7 +12,7 @@ interface Snapshot {
 }
 
 export function SnapshotsModal({ onClose }: { onClose: () => void }) {
-  const { projectId, setData } = useProjectStore();
+  const { projectId, setData, setProject } = useProjectStore();
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
@@ -82,8 +82,17 @@ export function SnapshotsModal({ onClose }: { onClose: () => void }) {
                 <div className="text-[10px] text-content-subtle">{new Date(s.createdAt).toLocaleDateString()}</div>
               </div>
               <button
-                onClick={() => {
-                  if (confirmId === s.id) { setData(s.data); onClose(); }
+                onClick={async () => {
+                  if (confirmId === s.id) {
+                    try {
+                      const res = await apiFetch(`/projects/${projectId}/snapshots/${s.id}/restore`, { method: "POST" });
+                      if (res.ok) {
+                        const project = await res.json();
+                        setProject({ id: project.id, data: project.data || {}, stageIdx: project.stageIdx ?? 0, version: project.version ?? 0 });
+                      }
+                    } catch { /* fallback: just close */ }
+                    onClose();
+                  }
                   else setConfirmId(s.id);
                 }}
                 className={`text-[11px] font-bold ${confirmId === s.id ? "text-danger" : "text-brand hover:underline"}`}>

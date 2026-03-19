@@ -114,7 +114,7 @@ export default function ProjectsPage() {
                     id: project.id,
                     data: project.data || {},
                     stageIdx: project.stageIdx ?? 0,
-                    version: 0,
+                    version: project.version ?? 0,
                   });
                   router.push("/workspace");
                 }}

@@ -120,7 +120,7 @@ const TOOLS = [
 ] as const;
 
 export default function WorkspacePage() {
-  const { projectId, data, stageIdx, tab, setTab, setStageIdx, update } =
+  const { projectId, data, stageIdx, tab, setTab, setStageIdx, update, version } =
     useProjectStore();
   const { loading, error } = useLoadProject();
   const [showCoach, setShowCoach] = useState(false);
@@ -131,7 +131,7 @@ export default function WorkspacePage() {
   const { user } = useUser();
 
   // FIX P0: Real autosave with actual status reporting
-  const saveStatus = useAutosave(data, projectId, !!projectId);
+  const saveStatus = useAutosave(data, projectId, !!projectId, version);
 
   // FIX P2: Skeleton loading instead of text
   if (loading) return <WorkspaceSkeleton />;

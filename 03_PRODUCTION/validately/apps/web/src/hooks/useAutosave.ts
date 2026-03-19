@@ -11,12 +11,13 @@ type SaveStatus = "saved" | "saving" | "error" | "offline";
 export function useAutosave(
   data: Record<string, string>,
   projectId: string | null,
-  enabled = true
+  enabled = true,
+  initialVersion = 0
 ): SaveStatus {
   const [status, setStatus] = useState<SaveStatus>("saved");
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevDataRef = useRef(JSON.stringify(data));
-  const versionRef = useRef(0);
+  const versionRef = useRef(initialVersion);
 
   useEffect(() => {
     if (!enabled || !projectId) return;
@@ -36,7 +37,8 @@ export function useAutosave(
           body: JSON.stringify({ data, version: versionRef.current }),
         });
         if (res.ok) {
-          versionRef.current += 1;
+          const updated = await res.json();
+          versionRef.current = updated?.version ?? versionRef.current + 1;
           setStatus("saved");
         } else {
           setStatus("error");

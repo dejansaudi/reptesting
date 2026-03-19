@@ -9,6 +9,7 @@ type ExportStatus = "idle" | "queued" | "processing" | "completed" | "failed";
 export function ExportModal({ onClose }: { onClose: () => void }) {
   const projectId = useProjectStore((s) => s.projectId);
   const [statuses, setStatuses] = useState<Record<string, ExportStatus>>({ pdf: "idle", "pitch-deck": "idle" });
+  const [downloadUrls, setDownloadUrls] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const cancelledRef = useRef(false);
 
@@ -34,7 +35,7 @@ export function ExportModal({ onClose }: { onClose: () => void }) {
         if (!poll.ok) continue;
         const job = await poll.json();
         if (cancelledRef.current) return;
-        if (job.status === "completed") { setStatuses((s) => ({ ...s, [type]: "completed" })); return; }
+        if (job.status === "completed") { if (job.url) setDownloadUrls((u) => ({ ...u, [type]: job.url })); setStatuses((s) => ({ ...s, [type]: "completed" })); return; }
         if (job.status === "failed") { setError(job.error || "Export failed"); setStatuses((s) => ({ ...s, [type]: "failed" })); return; }
         setStatuses((s) => ({ ...s, [type]: job.status }));
       }
@@ -69,7 +70,13 @@ export function ExportModal({ onClose }: { onClose: () => void }) {
                 {status !== "idle" && status !== "completed" && (
                   <div className="text-[10px] text-brand mt-1 animate-pulse capitalize">{status}...</div>
                 )}
-                {status === "completed" && <div className="text-[10px] text-success mt-1 font-bold">Ready for download</div>}
+                {status === "completed" && (
+                  <div className="text-[10px] text-success mt-1 font-bold">
+                    {downloadUrls[type] ? (
+                      <a href={downloadUrls[type]} download className="underline hover:no-underline">Download ready — click to save</a>
+                    ) : "Ready for download"}
+                  </div>
+                )}
               </div>
               <button onClick={() => startExport(type)} disabled={status === "queued" || status === "processing"}
                 className="px-3 py-2 rounded-lg bg-brand text-white text-xs font-bold hover:bg-brand-hover disabled:opacity-50 shrink-0">
