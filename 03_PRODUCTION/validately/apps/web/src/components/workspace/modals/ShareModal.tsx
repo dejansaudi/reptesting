@@ -4,13 +4,13 @@ import { useProjectStore } from "@/store/useProjectStore";
 import { Modal } from "../Modal";
 
 export function ShareModal({ onClose }: { onClose: () => void }) {
-  const { data } = useProjectStore();
+  const { data, projectId } = useProjectStore();
   const [copied, setCopied] = useState(false);
   const [url, setUrl] = useState("");
 
   useEffect(() => {
     const slug = (data.startup_name || "project").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-    setUrl(`${window.location.origin}/p/${slug}`);
+    setUrl(`${window.location.origin}/p/${projectId}/${slug}`);
   }, [data.startup_name]);
 
   return (
