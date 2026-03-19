@@ -47,9 +47,10 @@ export function AICoach({ show, onToggle }: AICoachProps) {
     setLoading(true);
 
     // Check genie triggers (instant client-side responses)
-    const trigger = GENIE_TRIGGERS.find(
-      (t) => t.stage === stageIdx && t.pattern.test(text)
-    );
+    // Prefer current-stage triggers, fall back to any stage match
+    const trigger =
+      GENIE_TRIGGERS.find((t) => t.stage === stageIdx && t.pattern.test(text)) ||
+      GENIE_TRIGGERS.find((t) => t.pattern.test(text));
     if (trigger) {
       setMessages((m) => [
         ...m,

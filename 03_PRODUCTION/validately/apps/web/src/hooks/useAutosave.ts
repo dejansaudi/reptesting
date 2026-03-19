@@ -12,7 +12,8 @@ export function useAutosave(
   data: Record<string, string>,
   projectId: string | null,
   enabled = true,
-  initialVersion = 0
+  initialVersion = 0,
+  onVersionChange?: (version: number) => void
 ): SaveStatus {
   const [status, setStatus] = useState<SaveStatus>("saved");
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -52,7 +53,10 @@ export function useAutosave(
         if (res.ok) {
           prevDataRef.current = serialized; // Only update after success
           const updated = await res.json();
-          versionRef.current = updated?.version ?? versionRef.current + 1;
+          const newVersion = updated?.version ?? versionRef.current + 1;
+          versionRef.current = newVersion;
+          // Sync version back to store so advanceStage uses the correct version
+          onVersionChange?.(newVersion);
           setStatus("saved");
         } else {
           setStatus("error");

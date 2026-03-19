@@ -50,7 +50,7 @@ export function DeployStage({ data, update }: StageProps) {
       >
         <FieldInput label="Sales Playbook" type="textarea" value={get("sales_playbook")}
           onChange={(v) => update("sales_playbook", v)}
-          placeholder="Lead source → Qualification → Demo → Close. Step by step." gate onAskAI={askAI} />
+          placeholder="Lead source → Qualification → Demo → Close. Step by step." gate autoFocus onAskAI={askAI} />
         <FieldInput label="Sales Cycle (days)" type="number" value={get("sales_cycle")}
           onChange={(v) => update("sales_cycle", v)} placeholder="e.g., 30" gate />
         <BenchmarkIndicator label="Sales Cycle" value={get("sales_cycle")} good="30" ok="60" bad="90" lowerIsBetter />
@@ -64,7 +64,7 @@ export function DeployStage({ data, update }: StageProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3">
           <FieldInput label="Key Metric" value={get("omtm_metric")}
             onChange={(v) => update("omtm_metric", v)} placeholder="e.g., Weekly Active Users, MRR, NPS"
-            hint="The one number your whole team obsesses over right now" gate autoFocus />
+            hint="The one number your whole team obsesses over right now" gate />
           <FieldInput label="Target" value={get("omtm_target")}
             onChange={(v) => update("omtm_target", v)} placeholder="e.g., 1000 WAU by March, $50k MRR by Q2"
             hint="Specific number + deadline" />

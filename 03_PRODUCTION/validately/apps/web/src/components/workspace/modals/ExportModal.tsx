@@ -64,7 +64,7 @@ export function ExportModal({ onClose }: { onClose: () => void }) {
   ];
 
   return (
-    <Modal onClose={onClose}>
+    <Modal onClose={onClose} aria-label="Export project">
       <div className="p-5 space-y-4">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-sm font-bold">Export</h2>

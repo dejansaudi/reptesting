@@ -69,19 +69,19 @@ export function BenchmarkIndicator({
         <div className="text-[9px] text-content-subtle text-right">
           {good && (
             <div>
-              Good: {good}
+              Good: {lowerIsBetter ? "\u2264" : "\u2265"}{good}
               {unit}
             </div>
           )}
           {ok && (
             <div>
-              OK: {ok}
+              OK: {lowerIsBetter ? "\u2264" : "\u2265"}{ok}
               {unit}
             </div>
           )}
           {bad && (
             <div>
-              Bad: {"<"}{bad}
+              Bad: {lowerIsBetter ? ">" : "<"}{bad}
               {unit}
             </div>
           )}

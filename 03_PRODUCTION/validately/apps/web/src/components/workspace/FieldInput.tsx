@@ -175,7 +175,9 @@ export function FieldInput({
             if (type === "number") {
               // Strip non-numeric characters (allow digits, one decimal point, empty)
               const raw = e.target.value;
-              const filtered = raw.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1");
+              let filtered = raw.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1");
+              // Don't allow bare dot with no digits
+              if (filtered === ".") filtered = "";
               onChange(filtered);
             } else {
               onChange(e.target.value);

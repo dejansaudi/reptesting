@@ -14,6 +14,7 @@ interface ProjectState {
   setStageIdx: (idx: number) => void;
   setTab: (tab: "build" | "assess") => void;
   setData: (data: Record<string, string>) => void;
+  setVersion: (version: number) => void;
   setProject: (p: {
     id: string;
     data: Record<string, string>;
@@ -36,6 +37,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   setStageIdx: (idx) => set({ stageIdx: idx }),
   setTab: (tab) => set({ tab }),
   setData: (data) => set({ data }),
+  setVersion: (version) => set({ version }),
   setProject: (p) =>
     set({
       projectId: p.id,

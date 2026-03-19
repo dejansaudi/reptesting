@@ -123,7 +123,7 @@ const TOOLS = [
 ] as const;
 
 export default function WorkspacePage() {
-  const { projectId, data, stageIdx, tab, setTab, setStageIdx, update, version } =
+  const { projectId, data, stageIdx, tab, setTab, setStageIdx, update, version, setVersion } =
     useProjectStore();
   const { loading, error } = useLoadProject();
   const [showCoach, setShowCoach] = useState(false);
@@ -134,7 +134,8 @@ export default function WorkspacePage() {
   const { user } = useUser();
 
   // FIX P0: Real autosave with actual status reporting
-  const saveStatus = useAutosave(data, projectId, !!projectId, version);
+  const saveStatus = useAutosave(data, projectId, !!projectId, version, setVersion);
+
 
   // Warn user before leaving with unsaved changes
   const handleBeforeUnload = useCallback(
