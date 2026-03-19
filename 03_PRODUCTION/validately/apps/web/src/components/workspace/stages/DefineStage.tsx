@@ -64,7 +64,7 @@ export function DefineStage({ data, update }: StageProps) {
         <div className="text-[11px] font-bold text-content mb-2.5">Value Map</div>
         <FieldInput label="Pain Relievers" type="textarea" value={get("pain_relievers")}
           onChange={(v) => update("pain_relievers", v)}
-          placeholder="How does your product eliminate or reduce customer pains?" gate onAskAI={askAI} />
+          placeholder="How does your product eliminate or reduce customer pains?" onAskAI={askAI} />
         <FieldInput label="Gain Creators" type="textarea" value={get("gain_creators")}
           onChange={(v) => update("gain_creators", v)}
           placeholder="How does your product create customer gains?" onAskAI={askAI} />
@@ -73,7 +73,7 @@ export function DefineStage({ data, update }: StageProps) {
       <div className="p-3 bg-surface-2 rounded-lg border border-border mb-4">
         <div className="text-[11px] font-bold text-content mb-2.5">Prototype Plan</div>
         <FieldSelect label="Prototype Level" value={get("prototype_level")}
-          onChange={(v) => update("prototype_level", v)} gate
+          onChange={(v) => update("prototype_level", v)}
           options={[
             { value: "whiteboard", label: "Whiteboard \u2014 Sketches and diagrams" },
             { value: "wireframe", label: "Wireframe \u2014 Clickable mockups" },

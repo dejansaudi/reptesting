@@ -1,12 +1,12 @@
 "use client";
-import { getSession } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 export async function apiFetch(path: string, options?: RequestInit) {
   const session = await getSession();
   const token = session?.accessToken;
-  return fetch(`${API_URL}/api${path}`, {
+  const res = await fetch(`${API_URL}/api${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -14,4 +14,11 @@ export async function apiFetch(path: string, options?: RequestInit) {
       ...options?.headers,
     },
   });
+
+  // Redirect to login on auth failure (expired/invalid session)
+  if (res.status === 401) {
+    signIn(undefined, { callbackUrl: window.location.pathname });
+  }
+
+  return res;
 }

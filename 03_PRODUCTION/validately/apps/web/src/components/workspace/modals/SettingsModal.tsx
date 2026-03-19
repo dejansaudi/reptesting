@@ -41,7 +41,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
           <p className="text-[10px] text-content-subtle mb-2">Required for AI coaching. Your key is encrypted at rest.</p>
           <input id={apiKeyId} type="password" value={apiKey} onChange={(e) => setApiKey(e.target.value)}
             placeholder="sk-ant-..." className="w-full py-2.5 px-4 rounded-lg bg-surface text-content border border-border text-sm mb-2 focus:border-brand focus:outline-none" />
-          <button onClick={saveKey} disabled={saving}
+          <button onClick={saveKey} disabled={saving || !apiKey.trim() || apiKey.startsWith("sk-ant-\u2022")}
             className="px-5 py-2 rounded-lg bg-brand text-white text-sm font-bold hover:bg-brand-hover disabled:opacity-50">
             {saved ? "Saved!" : saving ? "Saving..." : "Save Key"}
           </button>

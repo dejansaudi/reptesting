@@ -66,7 +66,7 @@ export function ValidateStage({ data, update }: StageProps) {
         <div className="text-[11px] font-bold text-content mb-2.5">Business Model Canvas</div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <FieldInput label="BMC Channels" type="textarea" value={get("bmc_channels")}
-            onChange={(v) => update("bmc_channels", v)} placeholder="How do you reach customers?" gate />
+            onChange={(v) => update("bmc_channels", v)} placeholder="How do you reach customers?" />
           <FieldInput label="BMC Customer Relationships" type="textarea" value={get("bmc_customer_relationships")}
             onChange={(v) => update("bmc_customer_relationships", v)} placeholder="How do you interact with customers?" />
           <FieldInput label="BMC Key Resources" type="textarea" value={get("bmc_key_resources")}
@@ -76,7 +76,7 @@ export function ValidateStage({ data, update }: StageProps) {
           <FieldInput label="BMC Key Partners" type="textarea" value={get("bmc_key_partners")}
             onChange={(v) => update("bmc_key_partners", v)} placeholder="Who helps you deliver?" />
           <FieldInput label="BMC Cost Structure" type="textarea" value={get("bmc_cost_structure")}
-            onChange={(v) => update("bmc_cost_structure", v)} placeholder="What are the major costs?" gate />
+            onChange={(v) => update("bmc_cost_structure", v)} placeholder="What are the major costs?" />
         </div>
       </div>
 
@@ -84,7 +84,7 @@ export function ValidateStage({ data, update }: StageProps) {
         <div className="text-[11px] font-bold text-content mb-2.5">Experiment Framework</div>
         <FieldInput label="Hypothesis" type="textarea" value={get("experiment_hypothesis")}
           onChange={(v) => update("experiment_hypothesis", v)}
-          placeholder="We believe [action] will result in [outcome]. We'll know when [metric] changes by [amount]." gate onAskAI={askAI} />
+          placeholder="We believe [action] will result in [outcome]. We'll know when [metric] changes by [amount]." onAskAI={askAI} />
         <FieldInput label="Experiment Result" type="textarea" value={get("experiment_result")}
           onChange={(v) => update("experiment_result", v)} placeholder="What happened?" onAskAI={askAI} />
         <FieldInput label="Experiment Learning" type="textarea" value={get("experiment_learning")}

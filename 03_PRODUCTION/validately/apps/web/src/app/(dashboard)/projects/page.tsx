@@ -3,14 +3,17 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useProjectStore } from "@/store/useProjectStore";
 import { apiFetch } from "@/lib/api";
-import { STAGE_META, calcIRS } from "@validately/shared";
+import { STAGE_META, calcIRS, TIER_LIMITS } from "@validately/shared";
+import { useUser } from "@/hooks/useUser";
 
 export default function ProjectsPage() {
   const router = useRouter();
   const setProject = useProjectStore((s) => s.setProject);
+  const { user } = useUser();
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   const [loadError, setLoadError] = useState(false);
 
@@ -28,13 +31,29 @@ export default function ProjectsPage() {
   }
 
   async function createProject() {
+    setCreateError(null);
+
+    // Client-side plan limit check
+    const plan = user?.plan || "free";
+    const limits = TIER_LIMITS[plan as keyof typeof TIER_LIMITS] ?? TIER_LIMITS.free;
+    if (projects.length >= limits.maxProjects) {
+      setCreateError(
+        `Your ${plan} plan allows ${limits.maxProjects} project${limits.maxProjects === 1 ? "" : "s"}. Upgrade to create more.`
+      );
+      return;
+    }
+
     setCreating(true);
     try {
       const res = await apiFetch("/projects", {
         method: "POST",
         body: JSON.stringify({ name: "Untitled Project" }),
       });
-      if (!res.ok) return;
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setCreateError(body?.message || "Failed to create project. Please try again.");
+        return;
+      }
       const project = await res.json();
       setProject({
         id: project.id,
@@ -43,6 +62,8 @@ export default function ProjectsPage() {
         version: project.version ?? 0,
       });
       router.push("/workspace");
+    } catch {
+      setCreateError("Network error. Please check your connection and try again.");
     } finally {
       setCreating(false);
     }
@@ -91,6 +112,14 @@ export default function ProjectsPage() {
           Failed to load projects. Please check your connection and try again.
           <button onClick={() => { setLoadError(false); setLoading(true); loadProjects(); }}
             className="ml-2 underline font-bold">Retry</button>
+        </div>
+      )}
+
+      {createError && (
+        <div className="bg-danger/10 border border-danger/30 text-danger text-sm p-4 rounded-lg mb-4">
+          {createError}
+          <button onClick={() => setCreateError(null)}
+            className="ml-2 underline font-bold">Dismiss</button>
         </div>
       )}
 

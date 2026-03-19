@@ -171,7 +171,16 @@ export function FieldInput({
           inputMode={type === "number" ? "numeric" : undefined}
           pattern={type === "number" ? "[0-9]*\\.?[0-9]*" : undefined}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => {
+            if (type === "number") {
+              // Strip non-numeric characters (allow digits, one decimal point, empty)
+              const raw = e.target.value;
+              const filtered = raw.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1");
+              onChange(filtered);
+            } else {
+              onChange(e.target.value);
+            }
+          }}
           placeholder={placeholder}
           disabled={disabled}
           maxLength={maxLength}

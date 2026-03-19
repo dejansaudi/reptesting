@@ -27,7 +27,7 @@ const STEPS = [
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { projectId } = useProjectStore();
+  const { projectId, setProject } = useProjectStore();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [name, setName] = useState("");
@@ -59,6 +59,13 @@ export default function OnboardingPage() {
         }),
       });
       if (res.ok) {
+        const project = await res.json();
+        setProject({
+          id: project.id,
+          data: project.data || {},
+          stageIdx: project.stageIdx ?? 0,
+          version: project.version ?? 0,
+        });
         router.push("/workspace");
       } else {
         router.push("/projects");

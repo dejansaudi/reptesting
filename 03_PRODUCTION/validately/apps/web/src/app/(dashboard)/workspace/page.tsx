@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { STAGE_META } from "@validately/shared";
 import { useProjectStore } from "@/store/useProjectStore";
@@ -132,6 +132,21 @@ export default function WorkspacePage() {
 
   // FIX P0: Real autosave with actual status reporting
   const saveStatus = useAutosave(data, projectId, !!projectId, version);
+
+  // Warn user before leaving with unsaved changes
+  const handleBeforeUnload = useCallback(
+    (e: BeforeUnloadEvent) => {
+      if (saveStatus === "saving" || saveStatus === "error") {
+        e.preventDefault();
+      }
+    },
+    [saveStatus]
+  );
+
+  useEffect(() => {
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [handleBeforeUnload]);
 
   // FIX P2: Skeleton loading instead of text
   if (loading) return <WorkspaceSkeleton />;

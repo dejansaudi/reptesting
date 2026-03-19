@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { PRICING_TIERS } from "@validately/shared";
 import { apiFetch } from "@/lib/api";
 import { Modal } from "../Modal";
@@ -6,8 +7,11 @@ import { Modal } from "../Modal";
 const tiers = Object.values(PRICING_TIERS);
 
 export function PricingModal({ currentPlan, onClose }: { currentPlan: string; onClose: () => void }) {
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+
   async function checkout(planId: string) {
-    if (planId === "free" || planId === currentPlan) return;
+    if (planId === "free" || planId === currentPlan || checkoutLoading) return;
+    setCheckoutLoading(planId);
     try {
       const res = await apiFetch("/billing/checkout", { method: "POST", body: JSON.stringify({ plan: planId }) });
       if (!res.ok) throw new Error();
@@ -15,6 +19,8 @@ export function PricingModal({ currentPlan, onClose }: { currentPlan: string; on
       if (url) window.location.href = url;
     } catch {
       alert("Checkout failed. Please try again.");
+    } finally {
+      setCheckoutLoading(null);
     }
   }
 
@@ -41,9 +47,9 @@ export function PricingModal({ currentPlan, onClose }: { currentPlan: string; on
                     </div>
                   ))}
                 </div>
-                <button onClick={() => checkout(tier.id)} disabled={isCurrent || isFree}
-                  className={`w-full py-2.5 rounded-lg text-sm font-bold ${isCurrent || isFree ? "bg-surface-3 text-content-subtle cursor-default" : "bg-brand text-white hover:bg-brand-hover"}`}>
-                  {isCurrent ? "Current Plan" : isFree ? "Free" : tier.cta || "Select Plan"}
+                <button onClick={() => checkout(tier.id)} disabled={isCurrent || isFree || !!checkoutLoading}
+                  className={`w-full py-2.5 rounded-lg text-sm font-bold ${isCurrent || isFree || checkoutLoading ? "bg-surface-3 text-content-subtle cursor-default" : "bg-brand text-white hover:bg-brand-hover"}`}>
+                  {checkoutLoading === tier.id ? "Redirecting..." : isCurrent ? "Current Plan" : isFree ? "Free" : tier.cta || "Select Plan"}
                 </button>
               </div>
             );
