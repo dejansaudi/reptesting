@@ -1,6 +1,7 @@
 "use client";
 import { FieldInput } from "../FieldInput";
 import { FieldSelect } from "../FieldSelect";
+import { CollapsibleSection } from "../CollapsibleSection";
 
 interface StageProps {
   data: Record<string, string>;
@@ -28,11 +29,13 @@ export function DiagnoseStage({ data, update }: StageProps) {
         </div>
       </div>
 
-      {/* Core Identity */}
-      <div className="p-3 bg-surface-2 rounded-lg border border-border mb-4">
-        <div className="text-[11px] font-bold text-content mb-2.5">
-          Core Identity
-        </div>
+      {/* Core Identity - always open, it's small and first */}
+      <CollapsibleSection
+        title="Core Identity"
+        fieldKeys={["startup_name", "team_size"]}
+        data={data}
+        defaultOpen
+      >
         <FieldInput
           label="Startup Name"
           value={get("startup_name")}
@@ -48,13 +51,15 @@ export function DiagnoseStage({ data, update }: StageProps) {
           onChange={(v) => update("team_size", v)}
           placeholder="e.g., 3"
         />
-      </div>
+      </CollapsibleSection>
 
       {/* Problem Validation */}
-      <div className="p-3 bg-surface-2 rounded-lg border border-border mb-4">
-        <div className="text-[11px] font-bold text-content mb-2.5">
-          Problem Validation
-        </div>
+      <CollapsibleSection
+        title="Problem Validation"
+        fieldKeys={["problem_statement", "who_has_problem", "contrarian_bet", "why_now"]}
+        data={data}
+        defaultOpen
+      >
         <FieldInput
           label="Problem Statement"
           type="textarea"
@@ -91,13 +96,14 @@ export function DiagnoseStage({ data, update }: StageProps) {
           gate
           onAskAI={askAI}
         />
-      </div>
+      </CollapsibleSection>
 
       {/* Market Sizing */}
-      <div className="p-3 bg-surface-2 rounded-lg border border-border mb-4">
-        <div className="text-[11px] font-bold text-content mb-2.5">
-          Market Sizing
-        </div>
+      <CollapsibleSection
+        title="Market Sizing"
+        fieldKeys={["tam_sam_som", "unfair_advantage"]}
+        data={data}
+      >
         <FieldInput
           label="TAM / SAM / SOM"
           type="textarea"
@@ -116,13 +122,14 @@ export function DiagnoseStage({ data, update }: StageProps) {
           gate
           onAskAI={askAI}
         />
-      </div>
+      </CollapsibleSection>
 
-      {/* Assumptions & Scoring */}
-      <div className="p-3 bg-surface-2 rounded-lg border border-border mb-4">
-        <div className="text-[11px] font-bold text-content mb-2.5">
-          Risk Assessment
-        </div>
+      {/* Risk Assessment */}
+      <CollapsibleSection
+        title="Risk Assessment"
+        fieldKeys={["assumptions", "pain_level", "barrier_level", "target_adopter"]}
+        data={data}
+      >
         <FieldInput
           label="Key Assumptions"
           type="textarea"
@@ -132,44 +139,47 @@ export function DiagnoseStage({ data, update }: StageProps) {
           gate
           onAskAI={askAI}
         />
-        <FieldSelect
-          label="Customer Pain Level"
-          value={get("pain_level")}
-          onChange={(v) => update("pain_level", v)}
-          gate
-          options={[
-            { value: "1", label: "1 \u2014 Nice to have" },
-            { value: "2", label: "2 \u2014 Mild inconvenience" },
-            { value: "3", label: "3 \u2014 Real frustration" },
-            { value: "4", label: "4 \u2014 Significant pain" },
-            { value: "5", label: "5 \u2014 Hair on fire" },
-          ]}
-        />
-        <FieldSelect
-          label="Market Barrier Level"
-          value={get("barrier_level")}
-          onChange={(v) => update("barrier_level", v)}
-          options={[
-            { value: "1", label: "1 \u2014 Very easy to enter" },
-            { value: "2", label: "2 \u2014 Low barriers" },
-            { value: "3", label: "3 \u2014 Moderate barriers" },
-            { value: "4", label: "4 \u2014 High barriers" },
-            { value: "5", label: "5 \u2014 Extremely difficult" },
-          ]}
-        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-3">
+          <FieldSelect
+            label="Customer Pain Level"
+            value={get("pain_level")}
+            onChange={(v) => update("pain_level", v)}
+            gate
+            options={[
+              { value: "1", label: "1 — Nice to have" },
+              { value: "2", label: "2 — Mild inconvenience" },
+              { value: "3", label: "3 — Real frustration" },
+              { value: "4", label: "4 — Significant pain" },
+              { value: "5", label: "5 — Hair on fire" },
+            ]}
+          />
+          <FieldSelect
+            label="Market Barrier Level"
+            value={get("barrier_level")}
+            onChange={(v) => update("barrier_level", v)}
+            options={[
+              { value: "1", label: "1 — Very easy to enter" },
+              { value: "2", label: "2 — Low barriers" },
+              { value: "3", label: "3 — Moderate barriers" },
+              { value: "4", label: "4 — High barriers" },
+              { value: "5", label: "5 — Extremely difficult" },
+            ]}
+          />
+        </div>
         <FieldSelect
           label="Target Adopter Segment"
           value={get("target_adopter")}
           onChange={(v) => update("target_adopter", v)}
           options={["Innovators", "Early Adopters", "Early Majority", "Late Majority"]}
         />
-      </div>
+      </CollapsibleSection>
 
       {/* Strategy Canvas */}
-      <div className="p-3 bg-surface-2 rounded-lg border border-border mb-4">
-        <div className="text-[11px] font-bold text-content mb-2.5">
-          Strategy Canvas
-        </div>
+      <CollapsibleSection
+        title="Strategy Canvas"
+        fieldKeys={["strategy_eliminate", "strategy_create"]}
+        data={data}
+      >
         <FieldInput
           label="ELIMINATE"
           type="textarea"
@@ -184,7 +194,7 @@ export function DiagnoseStage({ data, update }: StageProps) {
           onChange={(v) => update("strategy_create", v)}
           placeholder="What can you create that the industry has never offered?"
         />
-      </div>
+      </CollapsibleSection>
     </div>
   );
 }

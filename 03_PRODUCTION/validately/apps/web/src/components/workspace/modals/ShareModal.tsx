@@ -10,7 +10,9 @@ export function ShareModal({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     if (!projectId) return;
-    const slug = (data.startup_name || "project").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    // FIX P1: Use encodeURIComponent for unicode names, then slugify for readability
+    const raw = (data.startup_name || "project").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+    const slug = raw.replace(/[^a-z0-9\u00C0-\u024F\u1E00-\u1EFF]+/g, "-").replace(/^-|-$/g, "") || "project";
     setUrl(`${window.location.origin}/p/${projectId}/${slug}`);
   }, [data.startup_name, projectId]);
 

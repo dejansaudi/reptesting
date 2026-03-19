@@ -57,6 +57,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       xp: s.xp,
       stageIdx: s.stageIdx,
       tab: s.tab,
+      version: s.version,
     };
 
     // Optimistically update local state
@@ -69,16 +70,18 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       tab: "build",
     });
 
-    // Persist to server so stage advancement survives page refresh
+    // FIX P0: Read version at call time (not from stale snapshot) to avoid
+    // conflict when autosave bumps the version between get() and the PATCH.
     if (s.projectId) {
+      const currentVersion = get().version;
       apiFetch(`/projects/${s.projectId}`, {
         method: "PATCH",
-        body: JSON.stringify({ stageIdx: next, version: s.version }),
+        body: JSON.stringify({ stageIdx: next, version: currentVersion }),
       })
         .then(async (res) => {
           if (res.ok) {
             const updated = await res.json();
-            set({ version: updated?.version ?? s.version + 1 });
+            set({ version: updated?.version ?? currentVersion + 1 });
           } else {
             // Rollback on server rejection
             set(prev);

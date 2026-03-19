@@ -27,20 +27,32 @@ export function ExportModal({ onClose }: { onClose: () => void }) {
       });
       if (!res.ok) throw new Error();
       const { jobId } = await res.json();
-      // Poll for completion (with unmount guard)
-      for (let i = 0; i < 30; i++) {
-        await new Promise((r) => setTimeout(r, 1000));
+      // FIX P1: Poll with exponential backoff (1s→2s→4s, cap 5s) over 90s total
+      let elapsed = 0;
+      let delay = 1000;
+      while (elapsed < 90000) {
+        await new Promise((r) => setTimeout(r, delay));
+        elapsed += delay;
+        delay = Math.min(delay * 1.5, 5000);
         if (cancelledRef.current) return;
         const poll = await apiFetch(`/export/jobs/${jobId}`);
         if (!poll.ok) continue;
         const job = await poll.json();
         if (cancelledRef.current) return;
-        if (job.status === "completed") { if (job.url) setDownloadUrls((u) => ({ ...u, [type]: job.url })); setStatuses((s) => ({ ...s, [type]: "completed" })); return; }
-        if (job.status === "failed") { setError(job.error || "Export failed"); setStatuses((s) => ({ ...s, [type]: "failed" })); return; }
+        if (job.status === "completed") {
+          if (job.url) setDownloadUrls((u) => ({ ...u, [type]: job.url }));
+          setStatuses((s) => ({ ...s, [type]: "completed" }));
+          return;
+        }
+        if (job.status === "failed") {
+          setError(job.error || "Export failed");
+          setStatuses((s) => ({ ...s, [type]: "failed" }));
+          return;
+        }
         setStatuses((s) => ({ ...s, [type]: job.status }));
       }
       if (!cancelledRef.current) {
-        setError("Export timed out");
+        setError("Export timed out. Large projects may take longer — try again.");
         setStatuses((s) => ({ ...s, [type]: "failed" }));
       }
     } catch { if (!cancelledRef.current) { setError(`Failed to generate ${type === "pdf" ? "PDF" : "pitch deck"}`); setStatuses((s) => ({ ...s, [type]: "failed" })); } }

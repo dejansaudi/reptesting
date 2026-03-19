@@ -17,6 +17,7 @@ export function SnapshotsModal({ onClose }: { onClose: () => void }) {
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [restoreError, setRestoreError] = useState<string | null>(null);
 
   const loadSnapshots = useCallback(async () => {
     if (!projectId) return;
@@ -72,6 +73,9 @@ export function SnapshotsModal({ onClose }: { onClose: () => void }) {
           </div>
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
+          {restoreError && (
+            <div className="bg-danger/10 border border-danger/30 text-danger text-xs p-2.5 rounded-lg">{restoreError}</div>
+          )}
           {snapshots.length === 0 && (
             <div className="text-xs text-content-subtle text-center mt-4">No snapshots yet. Save one to create a checkpoint.</div>
           )}
@@ -84,14 +88,21 @@ export function SnapshotsModal({ onClose }: { onClose: () => void }) {
               <button
                 onClick={async () => {
                   if (confirmId === s.id) {
+                    setRestoreError(null);
                     try {
                       const res = await apiFetch(`/projects/${projectId}/snapshots/${s.id}/restore`, { method: "POST" });
                       if (res.ok) {
                         const project = await res.json();
                         setProject({ id: project.id, data: project.data || {}, stageIdx: project.stageIdx ?? 0, version: project.version ?? 0 });
+                        onClose();
+                      } else {
+                        setRestoreError("Failed to restore snapshot. Please try again.");
+                        setConfirmId(null);
                       }
-                    } catch { /* fallback: just close */ }
-                    onClose();
+                    } catch {
+                      setRestoreError("Network error. Could not restore snapshot.");
+                      setConfirmId(null);
+                    }
                   }
                   else setConfirmId(s.id);
                 }}

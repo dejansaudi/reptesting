@@ -1,5 +1,6 @@
 "use client";
 import { FieldInput } from "../FieldInput";
+import { CollapsibleSection } from "../CollapsibleSection";
 
 interface StageProps {
   data: Record<string, string>;
@@ -22,8 +23,12 @@ export function DiscoverStage({ data, update }: StageProps) {
         </div>
       </div>
 
-      <div className="p-3 bg-surface-2 rounded-lg border border-border mb-4">
-        <div className="text-[11px] font-bold text-content mb-2.5">Customer Interviews</div>
+      <CollapsibleSection
+        title="Customer Interviews"
+        fieldKeys={["interviews_count", "verbatim_quotes", "persona_primary", "top_pains"]}
+        data={data}
+        defaultOpen
+      >
         <FieldInput label="Number of interviews" type="number" value={get("interviews_count")}
           onChange={(v) => update("interviews_count", v)} placeholder="e.g., 25" gate autoFocus />
         <FieldInput label="Verbatim customer quotes" type="textarea" value={get("verbatim_quotes")}
@@ -35,10 +40,13 @@ export function DiscoverStage({ data, update }: StageProps) {
           gate onAskAI={askAI} />
         <FieldInput label="Top 3 pains" type="textarea" value={get("top_pains")}
           onChange={(v) => update("top_pains", v)} placeholder="1. \n2. \n3. " gate onAskAI={askAI} />
-      </div>
+      </CollapsibleSection>
 
-      <div className="p-3 bg-surface-2 rounded-lg border border-border mb-4">
-        <div className="text-[11px] font-bold text-content mb-2.5">Deep Understanding</div>
+      <CollapsibleSection
+        title="Deep Understanding"
+        fieldKeys={["think_feel", "current_workarounds", "journey_map"]}
+        data={data}
+      >
         <FieldInput label="What do they think/feel?" type="textarea" value={get("think_feel")}
           onChange={(v) => update("think_feel", v)} placeholder="What occupies their thinking? What worries them?"
           onAskAI={askAI} />
@@ -46,18 +54,23 @@ export function DiscoverStage({ data, update }: StageProps) {
           onChange={(v) => update("current_workarounds", v)} placeholder="How do they solve this problem today?" onAskAI={askAI} />
         <FieldInput label="Customer journey map" type="textarea" value={get("journey_map")}
           onChange={(v) => update("journey_map", v)} placeholder="Step 1: → Step 2: → Step 3: → Pain point:" onAskAI={askAI} />
-      </div>
+      </CollapsibleSection>
 
-      <div className="p-3 bg-surface-2 rounded-lg border border-border mb-4">
-        <div className="text-[11px] font-bold text-content mb-2.5">Competitive Landscape</div>
+      <CollapsibleSection
+        title="Competitive Landscape"
+        fieldKeys={["competitor_matrix"]}
+        data={data}
+      >
         <FieldInput label="Competitor matrix" type="textarea" value={get("competitor_matrix")}
           onChange={(v) => update("competitor_matrix", v)}
           placeholder="Competitor | Strengths | Weaknesses | Price | Our differentiation" gate onAskAI={askAI} />
-      </div>
+      </CollapsibleSection>
 
-      {/* FIX P2: Responsive grid — single column on mobile */}
-      <div className="p-3 bg-surface-2 rounded-lg border border-border mb-4">
-        <div className="text-[11px] font-bold text-content mb-2.5">Empathy Map</div>
+      <CollapsibleSection
+        title="Empathy Map"
+        fieldKeys={["empathy_think_feel", "empathy_see", "empathy_hear", "empathy_say_do"]}
+        data={data}
+      >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <FieldInput label="Think & Feel" type="textarea" value={get("empathy_think_feel")}
             onChange={(v) => update("empathy_think_feel", v)} placeholder="What occupies their thinking?" />
@@ -68,15 +81,18 @@ export function DiscoverStage({ data, update }: StageProps) {
           <FieldInput label="Say & Do" type="textarea" value={get("empathy_say_do")}
             onChange={(v) => update("empathy_say_do", v)} placeholder="What do they say publicly? How do they behave?" />
         </div>
-      </div>
+      </CollapsibleSection>
 
-      <div className="p-3 bg-surface-2 rounded-lg border border-border mb-4">
-        <div className="text-[11px] font-bold text-content mb-2.5">Value Proposition Canvas</div>
+      <CollapsibleSection
+        title="Value Proposition Canvas"
+        fieldKeys={["customer_jobs", "customer_gains"]}
+        data={data}
+      >
         <FieldInput label="Jobs to Be Done" type="textarea" value={get("customer_jobs")}
           onChange={(v) => update("customer_jobs", v)} placeholder="What job is the customer hiring your product to do?" onAskAI={askAI} />
         <FieldInput label="Customer Gains" type="textarea" value={get("customer_gains")}
           onChange={(v) => update("customer_gains", v)} placeholder="What outcomes do customers want?" />
-      </div>
+      </CollapsibleSection>
     </div>
   );
 }

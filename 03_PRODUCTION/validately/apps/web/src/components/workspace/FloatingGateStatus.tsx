@@ -11,7 +11,8 @@ interface FloatingGateStatusProps {
 
 /**
  * FIX P1: Floating/sticky gate status indicator at the top of the form.
- * Previously gate requirements were only shown at the BOTTOM of long forms.
+ * Now includes a "jump to next incomplete" action that scrolls to the
+ * first unfilled gate field.
  */
 export function FloatingGateStatus({
   stageIdx,
@@ -25,6 +26,33 @@ export function FloatingGateStatus({
   const total = criteria.length;
   const allPassed = passed === total;
   const pct = Math.round((passed / total) * 100);
+
+  function scrollToNextIncomplete() {
+    // Find the first gate-tagged field that's empty
+    const gateLabels = document.querySelectorAll('span[title="Required to advance to the next stage"]');
+    for (const badge of gateLabels) {
+      const container = badge.closest(".mb-3");
+      if (!container) continue;
+      const input = container.querySelector("input, textarea, select") as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null;
+      if (input && !input.value?.trim()) {
+        // Expand parent collapsible section if collapsed
+        const section = input.closest('[class*="overflow-hidden"]');
+        if (section) {
+          const btn = section.previousElementSibling as HTMLButtonElement | null;
+          if (btn?.getAttribute("aria-expanded") === "false") {
+            btn.click();
+            // Wait for animation then scroll
+            setTimeout(() => input.scrollIntoView({ behavior: "smooth", block: "center" }), 350);
+            setTimeout(() => input.focus(), 400);
+            return;
+          }
+        }
+        input.scrollIntoView({ behavior: "smooth", block: "center" });
+        setTimeout(() => input.focus(), 300);
+        return;
+      }
+    }
+  }
 
   return (
     <div
@@ -47,6 +75,15 @@ export function FloatingGateStatus({
       >
         {allPassed ? "\u2713 Ready" : `${passed}/${total} gates`}
       </span>
+      {!allPassed && (
+        <button
+          onClick={scrollToNextIncomplete}
+          className="text-[10px] font-bold text-brand hover:underline whitespace-nowrap"
+          title="Jump to next incomplete gate field"
+        >
+          Next &darr;
+        </button>
+      )}
     </div>
   );
 }

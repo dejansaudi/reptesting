@@ -16,7 +16,8 @@ export async function apiFetch(path: string, options?: RequestInit) {
   });
 
   // Redirect to login on auth failure (expired/invalid session)
-  if (res.status === 401) {
+  // FIX P0: Guard against SSR context where window is not available
+  if (res.status === 401 && typeof window !== "undefined") {
     signIn(undefined, { callbackUrl: window.location.pathname });
   }
 

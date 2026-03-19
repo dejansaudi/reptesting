@@ -30,8 +30,14 @@ export function ResearchModal({ onClose }: { onClose: () => void }) {
       const result = await res.json();
       setResults((r) => [result, ...r]);
       setQuery("");
-    } catch {
-      setResults((r) => [{ query: q, summary: "Research failed. Check your API key and try again.", sources: [], timestamp: new Date().toISOString() }, ...r]);
+    } catch (err) {
+      // FIX P1: Parse error to give specific guidance
+      const msg = err instanceof Error ? err.message : "";
+      const isApiKey = msg.toLowerCase().includes("api key") || msg.includes("401") || msg.includes("403");
+      const summary = isApiKey
+        ? "No API key configured. Go to Settings → API Key to add your key, then try again."
+        : "Research failed. Check your connection and API key in Settings, then try again.";
+      setResults((r) => [{ query: q, summary, sources: [], timestamp: new Date().toISOString() }, ...r]);
     } finally { setLoading(false); }
   }
 
