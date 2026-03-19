@@ -48,6 +48,8 @@ export function calcIRS(data) {
         const weighted = criteria.length > 0
             ? (passed / criteria.length) * WEIGHTS[stageId]
             : 0;
+        // FIX: Accumulate raw scores, only round for display in stage breakdown
+        score += weighted;
         stages.push({
             stage: stageId,
             passed,
@@ -56,7 +58,6 @@ export function calcIRS(data) {
             weighted: Math.round(weighted),
             maxWeight: WEIGHTS[stageId],
         });
-        score += weighted;
     }
     const { band, color: bandColor } = BANDS.find((b) => score >= b.min) || BANDS[BANDS.length - 1];
     return {

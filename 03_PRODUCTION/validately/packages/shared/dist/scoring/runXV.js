@@ -48,10 +48,13 @@ export const VCHECKS = [
             const filled = scores.filter((v) => parseInt(v || '0') > 0);
             if (filled.length === 0)
                 return true; // not started yet — not a failure
+            // FIX: Require at least 4/7 fields filled to prevent gaming with 1 high score
+            if (filled.length < 4)
+                return false;
             const avg = filled.reduce((s, v) => s + (parseInt(v || '0') || 0), 0) / filled.length;
             return avg >= 5;
         },
-        msg: 'Thiel Scorecard average below 5/10 — weak moat. Which powers will you strengthen?',
+        msg: 'Thiel Scorecard: score at least 4 of 7 powers with avg 5+/10 — assess your full moat',
     },
     { id: 'v16', stage: 6, field: 'company_purpose', severity: 'error', check: (d) => (d.company_purpose || '').length >= 20, msg: 'Company purpose too vague — why does this company exist?' },
     { id: 'v23', stage: 6, field: 'vision_10yr', severity: 'warning', check: (d) => (d.vision_10yr || '').length >= 30, msg: '10-year vision needs substance — where will this company be?' },

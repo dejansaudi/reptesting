@@ -14,7 +14,9 @@ export function checkGateCriterion(criterion, data) {
     }
     if (criterion.check.startsWith('minValue:')) {
         const min = parseFloat(criterion.check.split(':')[1]) || 0;
-        return (parseFloat(val) || 0) >= min;
+        // FIX: Require non-empty value, consistent with maxValue check
+        const num = parseFloat(val);
+        return val.length > 0 && !isNaN(num) && num >= min;
     }
     if (criterion.check.startsWith('maxValue:')) {
         const parsed = parseFloat(criterion.check.split(':')[1]);
