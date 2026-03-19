@@ -13,6 +13,7 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   const apiKeyId = useId();
 
   async function saveKey() {
+    if (!apiKey.trim()) { setError("Please enter an API key."); return; }
     setSaving(true);
     setError(null);
     try {

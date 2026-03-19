@@ -12,12 +12,16 @@ export default function ProjectsPage() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
 
+  const [loadError, setLoadError] = useState(false);
+
   async function loadProjects() {
     try {
       const res = await apiFetch("/projects");
-      if (!res.ok) return;
+      if (!res.ok) { setLoadError(true); return; }
       const { data } = await res.json();
       setProjects(data || []);
+    } catch {
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -82,7 +86,15 @@ export default function ProjectsPage() {
         </button>
       </div>
 
-      {projects.length === 0 ? (
+      {loadError && (
+        <div className="bg-danger/10 border border-danger/30 text-danger text-sm p-4 rounded-lg mb-4">
+          Failed to load projects. Please check your connection and try again.
+          <button onClick={() => { setLoadError(false); setLoading(true); loadProjects(); }}
+            className="ml-2 underline font-bold">Retry</button>
+        </div>
+      )}
+
+      {projects.length === 0 && !loadError ? (
         <div className="text-center py-16">
           <div className="text-3xl mb-3">{"\u{1F680}"}</div>
           <h2 className="text-lg font-bold mb-2">No projects yet</h2>
@@ -97,7 +109,7 @@ export default function ProjectsPage() {
             Create First Project
           </button>
         </div>
-      ) : (
+      ) : projects.length > 0 ? (
         <div className="grid gap-4">
           {projects.map((project) => {
             const irs = calcIRS(project.data || {});
@@ -152,7 +164,7 @@ export default function ProjectsPage() {
             );
           })}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
