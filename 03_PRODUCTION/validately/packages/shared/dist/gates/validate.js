@@ -4,22 +4,23 @@ import { GATE_CRITERIA } from './criteria';
  * Supports: "required", "minLength:N", "minValue:N", "maxValue:N"
  */
 export function checkGateCriterion(criterion, data) {
-    const val = data[criterion.field] || '';
+    const val = String(data[criterion.field] ?? '');
     if (criterion.check === 'required') {
         return val.length > 0;
     }
     if (criterion.check.startsWith('minLength:')) {
         const min = parseInt(criterion.check.split(':')[1]) || 0;
-        return String(val).length >= min;
+        return val.length >= min;
     }
     if (criterion.check.startsWith('minValue:')) {
         const min = parseFloat(criterion.check.split(':')[1]) || 0;
         return (parseFloat(val) || 0) >= min;
     }
     if (criterion.check.startsWith('maxValue:')) {
-        const max = parseFloat(criterion.check.split(':')[1]) || Infinity;
-        const num = parseFloat(String(val));
-        return String(val).length > 0 && !isNaN(num) && num <= max;
+        const parsed = parseFloat(criterion.check.split(':')[1]);
+        const max = isNaN(parsed) ? Infinity : parsed;
+        const num = parseFloat(val);
+        return val.length > 0 && !isNaN(num) && num <= max;
     }
     return false;
 }

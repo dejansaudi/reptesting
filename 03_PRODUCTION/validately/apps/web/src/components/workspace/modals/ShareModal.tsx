@@ -9,9 +9,10 @@ export function ShareModal({ onClose }: { onClose: () => void }) {
   const [url, setUrl] = useState("");
 
   useEffect(() => {
+    if (!projectId) return;
     const slug = (data.startup_name || "project").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     setUrl(`${window.location.origin}/p/${projectId}/${slug}`);
-  }, [data.startup_name]);
+  }, [data.startup_name, projectId]);
 
   return (
     <Modal onClose={onClose} aria-label="Share project">

@@ -11,7 +11,7 @@ export const VCHECKS = [
     { id: 'v2', stage: 1, field: 'interviews_count', severity: 'error', check: (d) => parseInt(d.interviews_count || '0') >= 15, msg: 'Minimum 15 customer interviews required' },
     { id: 'v19', stage: 1, field: 'verbatim_quotes', severity: 'warning', check: (d) => ((d.verbatim_quotes || '').match(/"/g) || []).length >= 4, msg: 'Include at least 2 actual verbatim quotes (in quotation marks)' },
     // Stage 2 — Define
-    { id: 'v3', stage: 2, field: 'must_have', severity: 'warning', check: (d) => ((d.must_have || '').match(/\n/g) || []).length <= 2, msg: 'Maximum 3 features for v1!' },
+    { id: 'v3', stage: 2, field: 'must_have', severity: 'warning', check: (d) => (d.must_have || '').split('\n').filter(l => l.trim()).length <= 3, msg: 'Maximum 3 features for v1!' },
     { id: 'v20', stage: 2, field: 'not_building', severity: 'warning', check: (d) => (d.not_building || '').length >= 20, msg: '"Not building" list should be substantial — what are you saying no to?' },
     // Stage 3 — Validate (errors = deal-breakers for investors)
     { id: 'v4', stage: 3, field: 'pmf_score', severity: 'error', check: (d) => parseFloat(d.pmf_score || '0') >= 40, msg: "PMF score below 40% — you don't have product-market fit" },
