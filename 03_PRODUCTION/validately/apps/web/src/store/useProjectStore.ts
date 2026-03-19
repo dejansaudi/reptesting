@@ -1,5 +1,6 @@
 "use client";
 import { create } from "zustand";
+import { apiFetch } from "@/lib/api";
 
 interface ProjectState {
   projectId: string | null;
@@ -22,7 +23,7 @@ interface ProjectState {
   advanceStage: () => void;
 }
 
-export const useProjectStore = create<ProjectState>((set) => ({
+export const useProjectStore = create<ProjectState>((set, get) => ({
   projectId: null,
   data: { startup_name: "" },
   stageIdx: 0,
@@ -45,17 +46,36 @@ export const useProjectStore = create<ProjectState>((set) => ({
       xp: 0,
       tab: "build",
     }),
-  advanceStage: () =>
-    set((s) => {
-      const next = s.stageIdx + 1;
-      if (next >= 7) return {};
-      return {
-        unlocked: s.unlocked.includes(next)
-          ? s.unlocked
-          : [...s.unlocked, next],
-        xp: s.xp + 100,
-        stageIdx: next,
-        tab: "build",
-      };
-    }),
+  advanceStage: () => {
+    const s = get();
+    const next = s.stageIdx + 1;
+    if (next >= 7) return;
+
+    // Optimistically update local state
+    set({
+      unlocked: s.unlocked.includes(next)
+        ? s.unlocked
+        : [...s.unlocked, next],
+      xp: s.xp + 100,
+      stageIdx: next,
+      tab: "build",
+    });
+
+    // Persist to server so stage advancement survives page refresh
+    if (s.projectId) {
+      apiFetch(`/projects/${s.projectId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ stageIdx: next, version: s.version }),
+      })
+        .then(async (res) => {
+          if (res.ok) {
+            const updated = await res.json();
+            set({ version: updated?.version ?? s.version + 1 });
+          }
+        })
+        .catch(() => {
+          // Silent failure — autosave will eventually sync
+        });
+    }
+  },
 }));

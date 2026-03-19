@@ -99,6 +99,7 @@ export function AICoach({ show, onToggle }: AICoachProps) {
    * Called by FieldInput "AI Review" button.
    */
   function askAboutField(fieldLabel: string, value: string) {
+    if (loading) return; // Prevent concurrent sends racing with each other
     const prompt = `Review my "${fieldLabel}" field:\n\n"${value.substring(0, 500)}"\n\nIs this specific enough? What's missing? Challenge my assumptions.`;
     setInput(prompt);
     if (!show) onToggle();

@@ -18,6 +18,14 @@ export function useAutosave(
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevDataRef = useRef(JSON.stringify(data));
   const versionRef = useRef(initialVersion);
+  const projectIdRef = useRef(projectId);
+
+  // Reset refs when project changes to avoid cross-project data leaks
+  useEffect(() => {
+    projectIdRef.current = projectId;
+    versionRef.current = initialVersion;
+    prevDataRef.current = JSON.stringify(data);
+  }, [projectId]);
 
   useEffect(() => {
     if (!enabled || !projectId) return;
@@ -29,13 +37,20 @@ export function useAutosave(
 
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
+    const savedProjectId = projectId;
     timeoutRef.current = setTimeout(async () => {
+      // Abort if project changed during debounce window
+      if (projectIdRef.current !== savedProjectId) return;
+
       setStatus("saving");
       try {
-        const res = await apiFetch(`/projects/${projectId}`, {
+        const res = await apiFetch(`/projects/${savedProjectId}`, {
           method: "PATCH",
           body: JSON.stringify({ data, version: versionRef.current }),
         });
+        // Abort state updates if project changed during fetch
+        if (projectIdRef.current !== savedProjectId) return;
+
         if (res.ok) {
           const updated = await res.json();
           versionRef.current = updated?.version ?? versionRef.current + 1;
@@ -44,7 +59,9 @@ export function useAutosave(
           setStatus("error");
         }
       } catch {
-        setStatus("error");
+        if (projectIdRef.current === savedProjectId) {
+          setStatus("error");
+        }
       }
     }, 1500);
 
