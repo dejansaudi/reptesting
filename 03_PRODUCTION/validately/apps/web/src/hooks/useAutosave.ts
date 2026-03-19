@@ -25,7 +25,7 @@ export function useAutosave(
     projectIdRef.current = projectId;
     versionRef.current = initialVersion;
     prevDataRef.current = JSON.stringify(data);
-  }, [projectId]);
+  }, [projectId, initialVersion]);
 
   useEffect(() => {
     if (!enabled || !projectId) return;

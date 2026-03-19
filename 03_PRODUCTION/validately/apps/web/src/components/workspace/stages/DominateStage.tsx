@@ -14,20 +14,23 @@ export function DominateStage({ data, update }: StageProps) {
   };
 
   const scores = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
-  const avgScore =
-    Math.round(
-      ([
-        get("thiel_engineering"),
-        get("thiel_timing"),
-        get("thiel_monopoly"),
-        get("thiel_people"),
-        get("thiel_distribution"),
-        get("thiel_durability"),
-        get("thiel_secret"),
-      ].reduce((sum, v) => sum + (parseInt(v) || 0), 0) /
-        7) *
-        10
-    ) / 10;
+  const thielFields = [
+    get("thiel_engineering"),
+    get("thiel_timing"),
+    get("thiel_monopoly"),
+    get("thiel_people"),
+    get("thiel_distribution"),
+    get("thiel_durability"),
+    get("thiel_secret"),
+  ];
+  const filledScores = thielFields.filter((v) => v !== "");
+  const avgScore = filledScores.length > 0
+    ? Math.round(
+        (filledScores.reduce((sum, v) => sum + (parseInt(v) || 0), 0) /
+          filledScores.length) *
+          10
+      ) / 10
+    : null;
 
   return (
     <div>
@@ -65,9 +68,11 @@ export function DominateStage({ data, update }: StageProps) {
         <FieldSelect label="Secret (Unique Insight)" value={get("thiel_secret")}
           onChange={(v) => update("thiel_secret", v)} options={scores}
           hint="What do you know that others don't?" />
-        <div className="p-2 bg-surface-1 rounded-md mt-2 text-[11px] text-content-muted">
-          Moat Score: <span className="font-bold text-brand text-sm">{avgScore}/10</span> avg
-        </div>
+        {avgScore !== null && (
+          <div className="p-2 bg-surface-1 rounded-md mt-2 text-[11px] text-content-muted">
+            Moat Score: <span className="font-bold text-brand text-sm">{avgScore}/10</span> avg ({filledScores.length}/7 scored)
+          </div>
+        )}
         <FieldInput label="Moat Summary" type="textarea" value={get("thiel_moat")}
           onChange={(v) => update("thiel_moat", v)}
           placeholder="Based on your scores above — which 2-3 powers are your strongest? How will you strengthen them?"

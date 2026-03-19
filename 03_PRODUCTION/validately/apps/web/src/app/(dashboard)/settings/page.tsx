@@ -136,6 +136,9 @@ export default function SettingsPage() {
           id="settings-api-key"
           type="password"
           value={apiKey}
+          onFocus={() => {
+            if (apiKey.startsWith("sk-ant-\u2022")) setApiKey("");
+          }}
           onChange={(e) => {
             setApiKey(e.target.value);
             setSaved(false);
