@@ -43,20 +43,10 @@ export default function SignupPage() {
         )}
 
         <button
-          onClick={async () => {
+          onClick={() => {
             setIsLoading(true);
             setError("");
-            try {
-              const result = await signIn("google", {
-                callbackUrl: "/workspace",
-                redirect: false,
-              });
-              if (result?.error) setError("Google sign-up failed. Please try again.");
-            } catch {
-              setError("Something went wrong. Please try again.");
-            } finally {
-              setIsLoading(false);
-            }
+            signIn("google", { callbackUrl: "/workspace" });
           }}
           disabled={isLoading}
           className="w-full py-3 px-4 rounded-lg bg-surface-2 border border-border text-sm font-semibold text-content hover:bg-surface-3 mb-3 disabled:opacity-50 transition-colors"

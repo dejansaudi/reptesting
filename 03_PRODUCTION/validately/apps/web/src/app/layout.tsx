@@ -7,6 +7,11 @@ export const metadata = {
     "7-stage AI-powered startup validation platform. From raw idea to investor-ready in weeks.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({
   children,
 }: {

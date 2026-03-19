@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
+import { useProjectStore } from "@/store/useProjectStore";
 
 const STEPS = [
   {
@@ -26,10 +27,16 @@ const STEPS = [
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { projectId } = useProjectStore();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Redirect if user already has a project (already onboarded)
+  useEffect(() => {
+    if (projectId) router.replace("/workspace");
+  }, [projectId, router]);
 
   async function completeOnboarding() {
     setLoading(true);
