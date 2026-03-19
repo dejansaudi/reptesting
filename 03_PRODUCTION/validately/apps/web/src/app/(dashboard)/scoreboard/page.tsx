@@ -1,4 +1,5 @@
 "use client";
+import { useEffect } from "react";
 import { useProjectStore } from "@/store/useProjectStore";
 import { calcIRS, STAGE_META, runXV } from "@validately/shared";
 import { useRouter } from "next/navigation";
@@ -36,8 +37,17 @@ function ScoreRing({ pct, size = 120 }: { pct: number; size?: number }) {
 }
 
 export default function ScoreboardPage() {
-  const { data } = useProjectStore();
+  const { data, projectId } = useProjectStore();
   const router = useRouter();
+
+  useEffect(() => {
+    if (!projectId) router.replace("/workspace");
+  }, [projectId, router]);
+
+  if (!projectId) {
+    return <div className="flex items-center justify-center min-h-[50vh] text-sm text-content-subtle">Loading project...</div>;
+  }
+
   const irs = calcIRS(data);
   const xv = runXV(data);
 

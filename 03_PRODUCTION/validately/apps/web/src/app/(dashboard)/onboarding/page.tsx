@@ -127,7 +127,7 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {step > 0 && !isNameStep && (
+        {step > 0 && (
           <button
             onClick={() => setStep(step - 1)}
             className="mt-4 text-xs text-content-subtle hover:text-content transition-colors"
