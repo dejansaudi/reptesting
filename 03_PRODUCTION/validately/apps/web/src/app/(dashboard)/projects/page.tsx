@@ -1,23 +1,33 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useProjectStore } from "@/store/useProjectStore";
 import { apiFetch } from "@/lib/api";
 import { STAGE_META, calcIRS, TIER_LIMITS } from "@validately/shared";
 import { useUser } from "@/hooks/useUser";
 
+interface Project {
+  id: string;
+  name: string;
+  data: Record<string, string>;
+  stageIdx: number;
+  version: number;
+  irsScore?: number;
+  updatedAt: string;
+}
+
 export default function ProjectsPage() {
   const router = useRouter();
   const setProject = useProjectStore((s) => s.setProject);
   const { user } = useUser();
-  const [projects, setProjects] = useState<any[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
 
   const [loadError, setLoadError] = useState(false);
 
-  async function loadProjects() {
+  const loadProjects = useCallback(async () => {
     try {
       const res = await apiFetch("/projects");
       if (!res.ok) { setLoadError(true); return; }
@@ -28,7 +38,7 @@ export default function ProjectsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   async function createProject() {
     setCreateError(null);

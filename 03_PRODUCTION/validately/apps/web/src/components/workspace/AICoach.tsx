@@ -94,6 +94,17 @@ export function AICoach({ show, onToggle }: AICoachProps) {
     }
   }
 
+  // Refs for stable access in askAboutField async closure
+  const stageIdxRef = useRef(stageIdx);
+  const dataRef = useRef(data);
+  const unmountedRef = useRef(false);
+  stageIdxRef.current = stageIdx;
+  dataRef.current = data;
+
+  useEffect(() => {
+    return () => { unmountedRef.current = true; };
+  }, []);
+
   /**
    * FIX P1: Public method for per-field AI review.
    * Called by FieldInput "AI Review" button.
@@ -105,6 +116,7 @@ export function AICoach({ show, onToggle }: AICoachProps) {
     if (!show) onToggle();
     // Auto-send after a small delay for better UX
     setTimeout(() => {
+      if (unmountedRef.current) return;
       const userMsg: Message = { role: "user", content: prompt };
       // Use functional updater to get fresh messages, then fire API call outside
       let snapshot: Message[] = [];
@@ -124,12 +136,13 @@ export function AICoach({ show, onToggle }: AICoachProps) {
           })),
           systemPrompt: AI_SYS,
           context: {
-            stage: stageIdx,
-            startupName: data.startup_name || "Unnamed",
+            stage: stageIdxRef.current,
+            startupName: dataRef.current.startup_name || "Unnamed",
           },
         }),
       })
         .then(async (res) => {
+          if (unmountedRef.current) return;
           if (!res.ok) throw new Error();
           const json = await res.json();
           setMessages((m) => [
@@ -138,6 +151,7 @@ export function AICoach({ show, onToggle }: AICoachProps) {
           ]);
         })
         .catch(() => {
+          if (unmountedRef.current) return;
           setMessages((m) => [
             ...m,
             {
@@ -146,7 +160,7 @@ export function AICoach({ show, onToggle }: AICoachProps) {
             },
           ]);
         })
-        .finally(() => setLoading(false));
+        .finally(() => { if (!unmountedRef.current) setLoading(false); });
     }, 100);
   }
 

@@ -76,13 +76,16 @@ function useLoadProject() {
             });
           }
         } else {
+          if (cancelled) return;
           const createRes = await apiFetch("/projects", {
             method: "POST",
             body: JSON.stringify({ name: "My Startup" }),
           });
           if (!createRes.ok) {
-            setError("Failed to create project");
-            setLoading(false);
+            if (!cancelled) {
+              setError("Failed to create project");
+              setLoading(false);
+            }
             return;
           }
           const newProject = await createRes.json();

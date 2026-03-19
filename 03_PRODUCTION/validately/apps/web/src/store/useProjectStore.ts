@@ -51,6 +51,14 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     const next = s.stageIdx + 1;
     if (next >= 7) return;
 
+    // Save previous state for rollback
+    const prev = {
+      unlocked: s.unlocked,
+      xp: s.xp,
+      stageIdx: s.stageIdx,
+      tab: s.tab,
+    };
+
     // Optimistically update local state
     set({
       unlocked: s.unlocked.includes(next)
@@ -71,10 +79,14 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
           if (res.ok) {
             const updated = await res.json();
             set({ version: updated?.version ?? s.version + 1 });
+          } else {
+            // Rollback on server rejection
+            set(prev);
           }
         })
         .catch(() => {
-          // Silent failure — autosave will eventually sync
+          // Rollback on network failure
+          set(prev);
         });
     }
   },

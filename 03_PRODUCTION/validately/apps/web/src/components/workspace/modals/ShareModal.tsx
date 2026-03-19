@@ -23,10 +23,11 @@ export function ShareModal({ onClose }: { onClose: () => void }) {
         </div>
         <p className="text-xs text-content-subtle mb-4">Share a public read-only view of your project with investors or mentors.</p>
         <div className="flex gap-2 mb-4">
-          <input type="text" readOnly value={url} className="flex-1 py-2.5 px-4 rounded-lg bg-surface text-content border border-border text-sm" />
+          <input type="text" readOnly value={url || "Generating link..."} className="flex-1 py-2.5 px-4 rounded-lg bg-surface text-content border border-border text-sm" />
           <button onClick={() => {
+            if (!url) return;
             navigator.clipboard.writeText(url).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
-          }} className="px-4 py-2.5 rounded-lg bg-brand text-white text-sm font-bold hover:bg-brand-hover">
+          }} disabled={!url} className="px-4 py-2.5 rounded-lg bg-brand text-white text-sm font-bold hover:bg-brand-hover disabled:opacity-50">
             {copied ? "Copied!" : "Copy"}
           </button>
         </div>

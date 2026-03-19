@@ -12,7 +12,7 @@ interface Snapshot {
 }
 
 export function SnapshotsModal({ onClose }: { onClose: () => void }) {
-  const { projectId, setData, setProject } = useProjectStore();
+  const { projectId, setProject } = useProjectStore();
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);

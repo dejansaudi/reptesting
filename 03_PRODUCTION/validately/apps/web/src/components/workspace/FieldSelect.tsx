@@ -61,9 +61,9 @@ export function FieldSelect({
         }}
       >
         <option value="">\u2014 Select \u2014</option>
-        {options.map((opt, idx) => (
+        {options.map((opt) => (
           <option
-            key={idx}
+            key={typeof opt === "string" ? opt : opt.value}
             value={typeof opt === "string" ? opt : opt.value}
           >
             {typeof opt === "string" ? opt : opt.label}
