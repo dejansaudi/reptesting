@@ -8,9 +8,11 @@ const tiers = Object.values(PRICING_TIERS);
 
 export function PricingModal({ currentPlan, onClose }: { currentPlan: string; onClose: () => void }) {
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function checkout(planId: string) {
     if (planId === "free" || planId === currentPlan || checkoutLoading) return;
+    setError(null);
     setCheckoutLoading(planId);
     try {
       const res = await apiFetch("/billing/checkout", { method: "POST", body: JSON.stringify({ plan: planId }) });
@@ -18,7 +20,7 @@ export function PricingModal({ currentPlan, onClose }: { currentPlan: string; on
       const { url } = await res.json();
       if (url) window.location.href = url;
     } catch {
-      alert("Checkout failed. Please try again.");
+      setError("Checkout failed. Please try again or contact support.");
     } finally {
       setCheckoutLoading(null);
     }
@@ -31,6 +33,7 @@ export function PricingModal({ currentPlan, onClose }: { currentPlan: string; on
           <h2 className="text-lg font-bold">Upgrade Your Plan</h2>
           <button onClick={onClose} aria-label="Close pricing" className="text-content-subtle hover:text-content text-lg">{"\u2715"}</button>
         </div>
+        {error && <div className="bg-danger/10 border border-danger/30 text-danger text-xs p-2.5 rounded-lg mb-4">{error}</div>}
         <div className="grid md:grid-cols-3 gap-4">
           {tiers.map((tier) => {
             const isCurrent = tier.id === currentPlan;

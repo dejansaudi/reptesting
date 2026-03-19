@@ -44,6 +44,9 @@ export function Modal({
   useEffect(() => {
     const previouslyFocused = document.activeElement as HTMLElement;
     document.addEventListener("keydown", handleKeyDown);
+    // Prevent background scroll while modal is open
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     const timer = setTimeout(() => {
       const el = contentRef.current?.querySelector<HTMLElement>(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
@@ -52,6 +55,7 @@ export function Modal({
     }, 0);
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = prevOverflow;
       clearTimeout(timer);
       previouslyFocused?.focus();
     };

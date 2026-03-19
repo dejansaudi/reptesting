@@ -18,6 +18,7 @@ export function SnapshotsModal({ onClose }: { onClose: () => void }) {
   const [saving, setSaving] = useState(false);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [restoreError, setRestoreError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const loadSnapshots = useCallback(async () => {
     if (!projectId) return;
@@ -37,6 +38,7 @@ export function SnapshotsModal({ onClose }: { onClose: () => void }) {
     if (!projectId) return;
     const snapshotName = name.trim() || `Snapshot ${snapshots.length + 1}`;
     setSaving(true);
+    setSaveError(null);
     try {
       const res = await apiFetch(`/projects/${projectId}/snapshots`, {
         method: "POST",
@@ -45,9 +47,11 @@ export function SnapshotsModal({ onClose }: { onClose: () => void }) {
       if (res.ok) {
         setName("");
         await loadSnapshots();
+      } else {
+        setSaveError("Failed to save snapshot. Please try again.");
       }
     } catch {
-      alert("Failed to save snapshot.");
+      setSaveError("Network error. Could not save snapshot.");
     } finally {
       setSaving(false);
     }
@@ -61,6 +65,9 @@ export function SnapshotsModal({ onClose }: { onClose: () => void }) {
           <button onClick={onClose} aria-label="Close snapshots" className="text-content-subtle hover:text-content text-lg">\u2715</button>
         </div>
         <div className="p-4 border-b border-border">
+          {saveError && (
+            <div className="bg-danger/10 border border-danger/30 text-danger text-xs p-2.5 rounded-lg mb-2">{saveError}</div>
+          )}
           <div className="flex gap-2">
             <input type="text" value={name} onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && save()}
