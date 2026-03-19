@@ -27,11 +27,11 @@ export function qScore(v) {
     // Bonus for structured answers (lists, bullets, paragraphs)
     if (/[\n•\-\*]\s/.test(x))
         s++;
-    // Penalty for buzzwords
+    // Penalty for buzzwords (progressive: -1 for any, -2 for 3+)
     const buzzCount = (x.match(BUZZWORDS) || []).length;
-    if (buzzCount >= 1)
-        s = Math.max(0, s - 1);
     if (buzzCount >= 3)
+        s = Math.max(0, s - 2);
+    else if (buzzCount >= 1)
         s = Math.max(0, s - 1);
     s = Math.min(4, s);
     // ── Evidence ─────────────────────────────────────────

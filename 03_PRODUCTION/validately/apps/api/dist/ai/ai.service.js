@@ -107,6 +107,9 @@ let AiService = class AiService {
         }
     }
     extractText(response) {
+        // FIX P1: Guard against empty or missing content array
+        if (!response?.content || !Array.isArray(response.content) || response.content.length === 0)
+            return '';
         const block = response.content[0];
         if (!block || block.type !== 'text')
             return '';

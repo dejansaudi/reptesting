@@ -36,9 +36,10 @@ let RateLimiterService = class RateLimiterService {
             throw new common_1.ForbiddenException('Hosted AI is not available on the Free plan. ' +
                 'Please upgrade to Pro or Team, or use your own API key (BYOK).');
         }
+        // FIX CRITICAL: Fail-closed when Redis is unavailable to prevent plan bypass
         if (!this.redis) {
-            console.warn('Redis not configured — rate limiting disabled');
-            return;
+            console.warn('Redis not configured — AI rate limiting fail-closed');
+            throw new common_1.ServiceUnavailableException('AI features temporarily unavailable. Please try again later.');
         }
         const key = this.getRateLimitKey(user.id);
         const now = new Date();

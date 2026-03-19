@@ -90,11 +90,19 @@ let UsersService = class UsersService {
         return `${iv.toString('hex')}:${tag.toString('hex')}:${encrypted}`;
     }
     decrypt(data) {
+        if (!data || typeof data !== 'string') {
+            throw new common_1.InternalServerErrorException('Malformed encrypted data');
+        }
         const parts = data.split(':');
         if (parts.length !== 3) {
             throw new common_1.InternalServerErrorException('Malformed encrypted data');
         }
         const [ivHex, tagHex, ciphertext] = parts;
+        // Validate hex format before attempting decryption
+        const hexRe = /^[0-9a-f]+$/i;
+        if (!hexRe.test(ivHex) || !hexRe.test(tagHex) || !hexRe.test(ciphertext)) {
+            throw new common_1.InternalServerErrorException('Malformed encrypted data');
+        }
         try {
             const key = this.getEncryptionKey();
             const iv = Buffer.from(ivHex, 'hex');
