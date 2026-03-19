@@ -42,6 +42,7 @@ export function Modal({
   );
 
   useEffect(() => {
+    const previouslyFocused = document.activeElement as HTMLElement;
     document.addEventListener("keydown", handleKeyDown);
     const timer = setTimeout(() => {
       const el = contentRef.current?.querySelector<HTMLElement>(
@@ -52,6 +53,7 @@ export function Modal({
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
       clearTimeout(timer);
+      previouslyFocused?.focus();
     };
   }, [handleKeyDown]);
 

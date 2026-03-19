@@ -114,7 +114,7 @@ export default function ProjectsPage() {
           {projects.map((project) => {
             const irs = calcIRS(project.data || {});
             const irsScore = project.irsScore ?? irs.score;
-            const stage = STAGE_META[project.stageIdx ?? 0];
+            const stage = STAGE_META[project.stageIdx ?? 0] ?? STAGE_META[0];
             const updated = new Date(project.updatedAt).toLocaleDateString();
 
             return (

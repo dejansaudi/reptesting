@@ -1,5 +1,5 @@
 "use client";
-import { useState, useId } from "react";
+import { useState, useEffect, useId } from "react";
 import { apiFetch } from "@/lib/api";
 import { useUser } from "@/hooks/useUser";
 import { Modal } from "../Modal";
@@ -12,8 +12,12 @@ export function SettingsModal({ onClose }: { onClose: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const apiKeyId = useId();
 
+  useEffect(() => {
+    if (user?.hasApiKey) setApiKey("sk-ant-\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022");
+  }, [user]);
+
   async function saveKey() {
-    if (!apiKey.trim()) { setError("Please enter an API key."); return; }
+    if (!apiKey.trim() || apiKey.startsWith("sk-ant-\u2022")) return;
     setSaving(true);
     setError(null);
     try {

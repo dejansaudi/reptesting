@@ -33,8 +33,6 @@ export function useAutosave(
     const serialized = JSON.stringify(data);
     if (serialized === prevDataRef.current) return;
 
-    prevDataRef.current = serialized;
-
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
     const savedProjectId = projectId;
@@ -52,6 +50,7 @@ export function useAutosave(
         if (projectIdRef.current !== savedProjectId) return;
 
         if (res.ok) {
+          prevDataRef.current = serialized; // Only update after success
           const updated = await res.json();
           versionRef.current = updated?.version ?? versionRef.current + 1;
           setStatus("saved");
