@@ -53,6 +53,6 @@ export const PRICING_TIERS = {
 export const TIER_LIMITS = {
     free: { maxProjects: 1, maxSnapshots: 5, maxBranches: 1 },
     pro: { maxProjects: 5, maxSnapshots: 50, maxBranches: 10 },
-    team: { maxProjects: Infinity, maxSnapshots: Infinity, maxBranches: Infinity },
+    team: { maxProjects: 999999, maxSnapshots: 999999, maxBranches: 999999 },
 };
 //# sourceMappingURL=pricing.js.map
