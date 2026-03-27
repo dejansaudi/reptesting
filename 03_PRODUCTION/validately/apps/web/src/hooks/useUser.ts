@@ -8,8 +8,8 @@ export function useUser() {
         id: data.user.id ?? "",
         email: data.user.email ?? "",
         name: data.user.name ?? "",
-        plan: (((data as Record<string, unknown>).plan as string) || "free").toLowerCase(),
-        hasApiKey: !!(data as Record<string, unknown>).hasApiKey,
+        plan: (((data as unknown as Record<string, unknown>).plan as string) || "free").toLowerCase(),
+        hasApiKey: !!(data as unknown as Record<string, unknown>).hasApiKey,
         image: data.user.image ?? undefined,
       }
     : null;
