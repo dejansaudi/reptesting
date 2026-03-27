@@ -1,0 +1,79 @@
+
+> @validately/web@0.1.0 build /home/user/reptesting/03_PRODUCTION/validately/apps/web
+> next build
+
+   ▲ Next.js 15.5.12
+
+   Creating an optimized production build ...
+ ⚠ Compiled with warnings in 3.4s
+
+../../node_modules/.pnpm/@prisma+client@6.19.2_prisma@6.19.2_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/runtime/wasm-engine-edge.js
+A Node.js API is used (setImmediate at line: 12) which is not supported in the Edge Runtime.
+Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+
+Import trace for requested module:
+../../node_modules/.pnpm/@prisma+client@6.19.2_prisma@6.19.2_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/runtime/wasm-engine-edge.js
+../../node_modules/.pnpm/@prisma+client@6.19.2_prisma@6.19.2_typescript@5.9.3__typescript@5.9.3/node_modules/.prisma/client/wasm.js
+../../node_modules/.pnpm/@prisma+client@6.19.2_prisma@6.19.2_typescript@5.9.3__typescript@5.9.3/node_modules/.prisma/client/default.js
+../../node_modules/.pnpm/@prisma+client@6.19.2_prisma@6.19.2_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client/default.js
+./src/lib/auth.ts
+
+../../node_modules/.pnpm/jose@6.2.1/node_modules/jose/dist/webapi/lib/deflate.js
+A Node.js API is used (CompressionStream at line: 10) which is not supported in the Edge Runtime.
+Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+
+Import trace for requested module:
+../../node_modules/.pnpm/jose@6.2.1/node_modules/jose/dist/webapi/lib/deflate.js
+../../node_modules/.pnpm/jose@6.2.1/node_modules/jose/dist/webapi/jwe/flattened/decrypt.js
+../../node_modules/.pnpm/jose@6.2.1/node_modules/jose/dist/webapi/index.js
+../../node_modules/.pnpm/@auth+core@0.41.0/node_modules/@auth/core/jwt.js
+../../node_modules/.pnpm/next-auth@5.0.0-beta.30_next@15.5.12_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1__react@18.3.1/node_modules/next-auth/jwt.js
+./src/lib/auth.ts
+
+../../node_modules/.pnpm/jose@6.2.1/node_modules/jose/dist/webapi/lib/deflate.js
+A Node.js API is used (DecompressionStream at line: 26) which is not supported in the Edge Runtime.
+Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+
+Import trace for requested module:
+../../node_modules/.pnpm/jose@6.2.1/node_modules/jose/dist/webapi/lib/deflate.js
+../../node_modules/.pnpm/jose@6.2.1/node_modules/jose/dist/webapi/jwe/flattened/decrypt.js
+../../node_modules/.pnpm/jose@6.2.1/node_modules/jose/dist/webapi/index.js
+../../node_modules/.pnpm/@auth+core@0.41.0/node_modules/@auth/core/jwt.js
+../../node_modules/.pnpm/next-auth@5.0.0-beta.30_next@15.5.12_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1__react@18.3.1/node_modules/next-auth/jwt.js
+./src/lib/auth.ts
+
+ ✓ Compiled successfully in 14.9s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/12) ...
+   Generating static pages (3/12) 
+   Generating static pages (6/12) 
+   Generating static pages (9/12) 
+ ✓ Generating static pages (12/12)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ○ /                                      165 B         106 kB
+├ ○ /_not-found                            996 B         103 kB
+├ ƒ /api/auth/[...nextauth]                126 B         102 kB
+├ ○ /login                                 929 B         110 kB
+├ ○ /onboarding                          1.67 kB         107 kB
+├ ƒ /p/[slug]                              126 B         102 kB
+├ ○ /pricing                               165 B         106 kB
+├ ○ /projects                            1.72 kB         114 kB
+├ ○ /scoreboard                          3.45 kB         116 kB
+├ ○ /settings                             1.9 kB         107 kB
+├ ○ /signup                                935 B         110 kB
+└ ○ /workspace                           17.2 kB         130 kB
++ First Load JS shared by all             102 kB
+  ├ chunks/337-78432647c1e9927d.js       46.2 kB
+  ├ chunks/514744e4-e280cc5f95b3d1ef.js  54.2 kB
+  └ other shared chunks (total)          1.86 kB
+
+
+ƒ Middleware                              142 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

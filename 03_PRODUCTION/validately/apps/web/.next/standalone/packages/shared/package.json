@@ -1,0 +1,25 @@
+{
+  "name": "@validately/shared",
+  "version": "0.1.0",
+  "description": "Shared types, constants, scoring, gates, and triggers for Validately",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vitest": "^2.0.0"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}

@@ -1,0 +1,116 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ProjectQueryDto = exports.UpdateProjectDto = exports.CreateProjectDto = void 0;
+const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
+class CreateProjectDto {
+}
+exports.CreateProjectDto = CreateProjectDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.MaxLength)(200),
+    __metadata("design:type", String)
+], CreateProjectDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsObject)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], CreateProjectDto.prototype, "data", void 0);
+class UpdateProjectDto {
+}
+exports.UpdateProjectDto = UpdateProjectDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.MaxLength)(200),
+    __metadata("design:type", String)
+], UpdateProjectDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsObject)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], UpdateProjectDto.prototype, "data", void 0);
+__decorate([
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Max)(6),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], UpdateProjectDto.prototype, "stageIdx", void 0);
+__decorate([
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], UpdateProjectDto.prototype, "unlocked", void 0);
+__decorate([
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Max)(100000),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], UpdateProjectDto.prototype, "xp", void 0);
+__decorate([
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], UpdateProjectDto.prototype, "isPublic", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.MaxLength)(100),
+    (0, class_validator_1.Matches)(/^[a-z0-9\-]+$/),
+    __metadata("design:type", String)
+], UpdateProjectDto.prototype, "publicSlug", void 0);
+__decorate([
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], UpdateProjectDto.prototype, "version", void 0);
+class ProjectQueryDto {
+    constructor() {
+        this.page = 1;
+        this.limit = 20;
+        this.sortBy = 'updatedAt';
+        this.order = 'desc';
+    }
+}
+exports.ProjectQueryDto = ProjectQueryDto;
+__decorate([
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    __metadata("design:type", Number)
+], ProjectQueryDto.prototype, "page", void 0);
+__decorate([
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Max)(100),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    __metadata("design:type", Number)
+], ProjectQueryDto.prototype, "limit", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsIn)(['updatedAt', 'createdAt', 'name']),
+    __metadata("design:type", String)
+], ProjectQueryDto.prototype, "sortBy", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsIn)(['asc', 'desc']),
+    __metadata("design:type", String)
+], ProjectQueryDto.prototype, "order", void 0);
+//# sourceMappingURL=projects.dto.js.map
