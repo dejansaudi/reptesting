@@ -24,11 +24,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
-          cache-dependency-path: 03_PRODUCTION/validately/pnpm-lock.yaml
-      - run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
-      - run: pnpm exec prisma generate --schema=packages/db/prisma/schema.prisma
-      - run: pnpm exec tsc --noEmit --project apps/web/tsconfig.json || true
+      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm --filter @validately/db run db:generate
+      - run: pnpm --filter @validately/web exec tsc --noEmit || true
 
   # ─── Unit Tests ───
   test:
@@ -42,11 +40,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
-          cache-dependency-path: 03_PRODUCTION/validately/pnpm-lock.yaml
-      - run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
-      - run: pnpm exec prisma generate --schema=packages/db/prisma/schema.prisma
-      - run: cd packages/shared && pnpm exec vitest run --passWithNoTests
+      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm --filter @validately/db run db:generate
+      - run: pnpm --filter @validately/shared exec vitest run --passWithNoTests
 
   # ─── Build Check ───
   build:
@@ -61,11 +57,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
-          cache-dependency-path: 03_PRODUCTION/validately/pnpm-lock.yaml
-      - run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
-      - run: pnpm exec prisma generate --schema=packages/db/prisma/schema.prisma
-      - run: cd apps/web && pnpm exec next build
+      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm --filter @validately/db run db:generate
+      - run: pnpm --filter @validately/web exec next build
         env:
           NEXTAUTH_SECRET: ci-test-secret
           NEXTAUTH_URL: http://localhost:3000
