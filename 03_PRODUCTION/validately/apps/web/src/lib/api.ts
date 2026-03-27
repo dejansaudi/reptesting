@@ -5,7 +5,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 export async function apiFetch(path: string, options?: RequestInit) {
   const session = await getSession();
-  const token = session?.accessToken;
+  const token = (session as unknown as Record<string, unknown>)?.accessToken as string | undefined;
   const res = await fetch(`${API_URL}/api${path}`, {
     ...options,
     headers: {

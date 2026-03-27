@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useUser } from "@/hooks/useUser";
-import { PRICING_TIERS } from "@validately/shared";
+import { PRICING_TIERS, type Plan } from "@validately/shared";
 import { apiFetch } from "@/lib/api";
 
 export default function SettingsPage() {
@@ -88,7 +88,7 @@ export default function SettingsPage() {
     );
   }
 
-  const plan = user?.plan || "free";
+  const plan = (user?.plan || "free") as Plan;
   const planName = PRICING_TIERS[plan]?.name ?? plan.toUpperCase();
   const isPaid = plan !== "free";
 
