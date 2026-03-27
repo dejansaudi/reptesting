@@ -5,6 +5,7 @@ on:
     branches: [main, staging]
   pull_request:
     branches: [main, staging]
+  workflow_call:
 
 defaults:
   run:
@@ -26,8 +27,8 @@ jobs:
           cache: pnpm
           cache-dependency-path: 03_PRODUCTION/validately/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
-      - run: npx prisma generate --schema=packages/db/prisma/schema.prisma
-      - run: npx tsc --noEmit --project apps/web/tsconfig.json || true
+      - run: pnpm exec prisma generate --schema=packages/db/prisma/schema.prisma
+      - run: pnpm exec tsc --noEmit --project apps/web/tsconfig.json || true
 
   # ─── Unit Tests ───
   test:
@@ -44,8 +45,8 @@ jobs:
           cache: pnpm
           cache-dependency-path: 03_PRODUCTION/validately/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
-      - run: npx prisma generate --schema=packages/db/prisma/schema.prisma
-      - run: cd packages/shared && npx vitest run --passWithNoTests
+      - run: pnpm exec prisma generate --schema=packages/db/prisma/schema.prisma
+      - run: cd packages/shared && pnpm exec vitest run --passWithNoTests
 
   # ─── Build Check ───
   build:
@@ -63,8 +64,8 @@ jobs:
           cache: pnpm
           cache-dependency-path: 03_PRODUCTION/validately/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
-      - run: npx prisma generate --schema=packages/db/prisma/schema.prisma
-      - run: cd apps/web && npx next build
+      - run: pnpm exec prisma generate --schema=packages/db/prisma/schema.prisma
+      - run: cd apps/web && pnpm exec next build
         env:
           NEXTAUTH_SECRET: ci-test-secret
           NEXTAUTH_URL: http://localhost:3000
