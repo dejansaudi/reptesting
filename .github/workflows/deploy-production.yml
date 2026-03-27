@@ -1,0 +1,41 @@
+name: Deploy Production
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  # Run CI first
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: ci
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      # ─── Option 1: Railway (uncomment when ready) ───
+      # - name: Deploy to Railway
+      #   uses: bervProject/railway-deploy@main
+      #   with:
+      #     railway_token: ${{ secrets.RAILWAY_TOKEN }}
+      #     service: validately-production
+
+      # ─── Option 2: Docker on VM (uncomment when ready) ───
+      # - name: Deploy via SSH
+      #   uses: appleboy/ssh-action@v1
+      #   with:
+      #     host: ${{ secrets.PRODUCTION_HOST }}
+      #     username: ${{ secrets.PRODUCTION_USER }}
+      #     key: ${{ secrets.PRODUCTION_SSH_KEY }}
+      #     script: |
+      #       cd /opt/validately
+      #       git pull origin main
+      #       cd 03_PRODUCTION/validately
+      #       docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d
+
+      - name: Placeholder
+        run: echo "Production deployment configured. Uncomment your deployment method above."
