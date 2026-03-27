@@ -17,12 +17,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: 03_PRODUCTION/validately/package-lock.json
-      - run: npm ci --ignore-scripts
+          cache: pnpm
+          cache-dependency-path: 03_PRODUCTION/validately/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
       - run: npx prisma generate --schema=packages/db/prisma/schema.prisma
       - run: npx tsc --noEmit --project apps/web/tsconfig.json || true
 
@@ -32,12 +35,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: 03_PRODUCTION/validately/package-lock.json
-      - run: npm ci --ignore-scripts
+          cache: pnpm
+          cache-dependency-path: 03_PRODUCTION/validately/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
       - run: npx prisma generate --schema=packages/db/prisma/schema.prisma
       - run: cd packages/shared && npx vitest run --passWithNoTests
 
@@ -48,12 +54,15 @@ jobs:
     needs: [quality, test]
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: 03_PRODUCTION/validately/package-lock.json
-      - run: npm ci --ignore-scripts
+          cache: pnpm
+          cache-dependency-path: 03_PRODUCTION/validately/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
       - run: npx prisma generate --schema=packages/db/prisma/schema.prisma
       - run: cd apps/web && npx next build
         env:

@@ -1,9 +1,11 @@
 FROM node:20-alpine
 
+RUN corepack enable && corepack prepare pnpm@9 --activate
+
 WORKDIR /app
 
 # Copy root package files
-COPY package.json package-lock.json ./
+COPY package.json pnpm-workspace.yaml ./
 
 # Copy workspace package.json files
 COPY apps/web/package.json ./apps/web/
@@ -12,7 +14,7 @@ COPY packages/shared/package.json ./packages/shared/
 COPY packages/eslint-config/package.json ./packages/eslint-config/
 
 # Install dependencies
-RUN npm install --ignore-scripts
+RUN pnpm install --no-frozen-lockfile --ignore-scripts
 
 # Copy source
 COPY packages/db/ ./packages/db/
