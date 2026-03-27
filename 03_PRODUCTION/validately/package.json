@@ -1,0 +1,26 @@
+{
+  "name": "validately",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "start": "turbo run start",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "db:generate": "npm run db:generate --workspace=@validately/db",
+    "db:push": "npm run db:push --workspace=@validately/db",
+    "db:migrate": "npm run db:migrate --workspace=@validately/db",
+    "db:studio": "npm run db:studio --workspace=@validately/db",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.2.0",
+    "turbo": "^2.4.0"
+  },
+  "packageManager": "npm@10.0.0"
+}
