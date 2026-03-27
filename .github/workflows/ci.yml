@@ -5,6 +5,7 @@ on:
     branches: [main, staging]
   pull_request:
     branches: [main, staging]
+  workflow_call:
 
 defaults:
   run:
@@ -23,9 +24,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
-          cache-dependency-path: 03_PRODUCTION/validately/pnpm-lock.yaml
-      - run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
+      - run: pnpm install --no-frozen-lockfile
       - run: npx prisma generate --schema=packages/db/prisma/schema.prisma
       - run: npx tsc --noEmit --project apps/web/tsconfig.json || true
 
@@ -41,9 +40,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
-          cache-dependency-path: 03_PRODUCTION/validately/pnpm-lock.yaml
-      - run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
+      - run: pnpm install --no-frozen-lockfile
       - run: npx prisma generate --schema=packages/db/prisma/schema.prisma
       - run: cd packages/shared && npx vitest run --passWithNoTests
 
@@ -60,9 +57,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
-          cache-dependency-path: 03_PRODUCTION/validately/pnpm-lock.yaml
-      - run: pnpm install --frozen-lockfile || pnpm install --no-frozen-lockfile
+      - run: pnpm install --no-frozen-lockfile
       - run: npx prisma generate --schema=packages/db/prisma/schema.prisma
       - run: cd apps/web && npx next build
         env:
